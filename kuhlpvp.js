@@ -48,12 +48,23 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 
 
 	/**
+	 * Table
+	 * @type {Object}
+	 */
+	this.table 			= {};	
+
+
+	/**
 	 * Current PVP Mode
 	 * @type {kuhlpvp_pvpmode_type}
 	 */
 	this.pvpMode 		= {};
 
 
+	/**
+	 * Is Ready
+	 * @type {Boolean}
+	 */
 	this.ready 			= false;
 
 
@@ -69,40 +80,85 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 	 */
 	this.init 			= function(pluginObject, configObject, dataObject, rust) {
 
-		//Print to Server
+		/**
+		 * Print Startup
+		 */
 		this.console("KuhlPVP Started");
 
-		//Passed Objects from Oxide
-		////Plugin
+
+		/**
+		 * Oxide Plugin Object
+		 * @type {Oxide.Plugin}
+		 */
 		this.plugin 	= pluginObject;
-		////Config
+		
+
+		/**
+		 * Oxide Config Object
+		 * @type {Oxide.Config}
+		 */
 		this.config 	= configObject;
-		////Data
+		
+
+		/**
+		 * Oxide Datafile
+		 * @type {Oxide.datafile}
+		 */
 		this.data 		= dataObject;
-		////Rust
+
+		
+		/**
+		 * Oxide Rust Object
+		 * @type {Oxide.Rust}
+		 */
 		this.rust		= rust;
 
-		//Import Game Objects
-		////kuhlpvp_time_api
+
+		/**
+		 * Time API
+		 * @type {kuhlpvp_time_api}
+		 */
 		this.time 		= new kuhlpvp_time_api();
 
-		//Set PVP Mode
+
+		/**
+		 * Set PVP Mode
+		 */
 		var pvpModeStr 	= configObject.Settings['pvpMode'];
 		this.pvpMode 	= new kuhlpvp_pvpmode_type(pvpModeStr);
 		this.console("KuhlPVP Mode set to " + this.pvpMode.label);
 
 
+		/**
+		 * Set Data Table 
+		 * @type {Oxide.Datafile}
+		 */
+		this.table 		= this.initData();
+
+
+		/**
+		 * Set Ready
+		 */
 		this.ready 		= true;
+
+
+		/**
+		 * Check PVE Settings
+		 */
 		var pve 		= this.checkPVPMode();
 		if (pve == 1) {
 			this.console("Server In PVE Mode");
 		} else {
 			this.console("Server In PVP Mode");
 		}
+
 		
-		//Return Self
+		/**
+		 * Return this object
+		 */
 		return this;
 	};
+
 
 	/**
 	 * Tick Event
@@ -113,6 +169,10 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 		this.checkPVPMode();
 	};
 
+	/**
+	 * CHeck the PVP Mode Settings
+	 * @return {Integer} PVE Setting Value
+	 */
 	this.checkPVPMode 	= function() {
 		var pve 		= this.serverPveMode();
 
@@ -142,10 +202,30 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 				if (!pve) this.serverPveSet(1);
 			break;
 
+			case 'random':
+				var handler 	= new kuhlpvp_random_handler(this.data);
+				if (handler.mode() != pve) this.serverPveSet(handler.mode());
+			break;
+
+			case 'interval':
+				var handler 	= new kuhlpvp_interval_handler(this.data);
+				if (handler.mode() != pve) this.serverPveSet(handler.mode());
+			break;
+
+			case 'event':
+				var handler 	= new kuhlpvp_event_handler(this.data);
+				if (handler.mode() != pve) this.serverPveSet(handler.mode());
+			break;
+
 		}
 
 		return pve;
-	}
+	};
+
+
+	this.initData 		= function() {
+		this.tabe 		= this.data.GetDataTable("kuhlpvp");
+	};
 
 
 	/**
@@ -259,7 +339,12 @@ var kuhlpvp_time_api 	= function() {
 };
 
 
-var kuhlpvp_pvpmode_type= function(typeName) {
+/**
+ * PVP Mode Type
+ * @param  {String}
+ * @return {kuhlpvp_pvpmode_type}
+ */
+var kuhlpvp_pvpmode_type		= function(typeName) {
 
 	this.value 			= 0;
 	this.label 			= '';
@@ -319,6 +404,54 @@ var kuhlpvp_pvpmode_type= function(typeName) {
 };
 
 
+var kuhlpvp_random_handler		= function(dataObject) {
+
+	this.data 			= {};
+
+	this.init 			= function(dataObject) {
+		this.data = dataObject;
+	};
+
+
+	this.mode 			= function() {
+
+	};
+
+	return this.init(dataObject);
+};
+
+var kuhlpvp_interval_handler	= function(dataObject) {
+
+	this.data 			= {};
+
+	this.init 			= function(dataObject) {
+		this.data = dataObject;
+	};
+
+
+	this.mode 			= function() {
+
+	};
+
+	return this.init(dataObject);
+};
+
+var kuhlpvp_event_handler		= function(dataObject) {
+
+	this.data 			= {};
+
+	this.init 			= function(dataObject) {
+		this.data = dataObject;
+	};
+
+	this.mode 			= function() {
+
+	};
+
+	return this.init();
+};
+
+
 /**
  * Oxide Interop Object
  * @type {Object}
@@ -333,7 +466,7 @@ var kuhlpvp = {
     ready: 			false,
 
     Init: 					function () {
-    	this.api 	= new kuhlpvp_api(this.Plugin, this.Config, this.Data, rust);
+    	this.api 	= new kuhlpvp_api(this.Plugin, this.Config, datafile, rust);
     	this.ready 	= true;
     },
 
