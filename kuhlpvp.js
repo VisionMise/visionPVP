@@ -1,20 +1,20 @@
 /**
- * kuhlPVP
+ * VisionPVP
  *
- * @author VisionMise
- * @version  0.1.1
+ * @author 			VisionMise
+ * @version  		0.1.1
+ * @description 	First Working Version :: Please README.md for More Information
  * 
  * @param  {Oxide.Plugin} 	pluginObject
  * @param  {Oxide.Config} 	configObject
- * @param  {Oxide.Data}		dataObject
  * @param  {Oxide.rust}		rust
- * @return {kuhlpvp_api}
+ * @return {visionPVP_api}
  */
-var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
+var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 
 	/**
 	 * Time API
-	 * @type {kuhlpvp_time_api}
+	 * @type {visionPVP_time_api}
 	 */
 	this.time 			= {};
 
@@ -41,22 +41,22 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 
 
 	/**
-	 * Global Data Object
-	 * @type {Oxide.Data}
-	 */
-	this.data 			= {};
-
-
-	/**
 	 * Table
-	 * @type {Object}
+	 * @type {Oxide.DataFile.Table}
 	 */
 	this.table 			= {};	
 
 
 	/**
+	 * Global Data Object
+	 * @type {Oxide.DataFile}
+	 */
+	this.data 			= {};
+
+
+	/**
 	 * Current PVP Mode
-	 * @type {kuhlpvp_pvpmode_type}
+	 * @type {visionPVP_pvpmode_type}
 	 */
 	this.pvpMode 		= {};
 
@@ -74,16 +74,15 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 	 * Kuhl PVP API Initialization 
 	 *@param  {Oxide.Plugin} 	pluginObject
  	 *@param  {Oxide.Config} 	configObject
- 	 *@param  {Oxide.Data}		dataObject
  	 *@param  {Oxide.rust}		rust
 	 *@return {this}
 	 */
-	this.init 			= function(pluginObject, configObject, dataObject, rust) {
+	this.init 			= function(pluginObject, configObject, rust, data) {
 
 		/**
 		 * Print Startup
 		 */
-		this.console("KuhlPVP Started");
+		this.console("visionPVP Started");
 
 
 		/**
@@ -99,13 +98,6 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 		 */
 		this.config 	= configObject;
 		
-
-		/**
-		 * Oxide Datafile
-		 * @type {Oxide.datafile}
-		 */
-		this.data 		= dataObject;
-
 		
 		/**
 		 * Oxide Rust Object
@@ -115,25 +107,26 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 
 
 		/**
-		 * Time API
-		 * @type {kuhlpvp_time_api}
+		 * Oxide Data Object
+		 * @type {Oxide.DataFile}
 		 */
-		this.time 		= new kuhlpvp_time_api();
+		this.data 		= data;
+		this.table 		= this.data.GetData("visionPVP") || {};
+		
+
+		/**
+		 * Time API
+		 * @type {visionPVP_time_api}
+		 */
+		this.time 		= new visionPVP_time_api();
 
 
 		/**
 		 * Set PVP Mode
 		 */
 		var pvpModeStr 	= configObject.Settings['pvpMode'];
-		this.pvpMode 	= new kuhlpvp_pvpmode_type(pvpModeStr);
-		this.console("KuhlPVP Mode set to " + this.pvpMode.label);
-
-
-		/**
-		 * Set Data Table 
-		 * @type {Oxide.Datafile}
-		 */
-		this.table 		= this.initData();
+		this.pvpMode 	= new visionPVP_pvpmode_type(pvpModeStr);
+		this.console("visionPVP Mode set to " + this.pvpMode.label);
 
 
 		/**
@@ -145,12 +138,8 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 		/**
 		 * Check PVE Settings
 		 */
-		var pve 		= this.checkPVPMode();
-		if (pve == 1) {
-			this.console("Server In PVE Mode");
-		} else {
-			this.console("Server In PVP Mode");
-		}
+		var mode 		= this.checkPVPMode();
+		this.console("PVE Mode: " + mode);
 
 		
 		/**
@@ -165,9 +154,10 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 	 * @return {Void}
 	 */
 	this.timerTick 		= function() {
-		if (!this.ready == false) return false;
+		if (this.ready == false) return false;
 		this.checkPVPMode();
 	};
+
 
 	/**
 	 * CHeck the PVP Mode Settings
@@ -175,56 +165,76 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 	 */
 	this.checkPVPMode 	= function() {
 		var pve 		= this.serverPveMode();
+		var msg 		= '';
 
 		switch (this.pvpMode.name) {
 
 			case 'pvp_night':
 				if (this.time.isDay()) {
-					if (!pve) this.serverPveSet(1);
+					if (!pve) {
+						msg 	= "Shutting PVP Off. Its Daytime"
+						this.serverPveSet(1, msg);
+						this.console(msg);
+					}
 				} else {
-					if (pve) this.serverPveSet(0);
+					if (pve) {
+						msg 	= "Turning PVP On. Its Night";
+						this.serverPveSet(0, msg);
+						this.console(msg);
+					}
 				}
 			break;
 
 			case 'pvp_day':
 				if (this.time.isNight()) {
-					if (!pve) this.serverPveSet(1);
+					if (!pve) {
+						msg 	= "Shutting PVP Off. Its Night";
+						this.serverPveSet(1, msg);
+						this.console(msg);
+					}
 				} else {
-					if (pve) this.serverPveSet(0);
+					if (pve) {
+						msg 	= "Turning PVP On. Its Daytime";
+						this.serverPveSet(0, msg);
+						this.console(msg);
+					}
 				}
 			break;
 
 			case 'pvp':
-				if (pve) this.serverPveSet(0);
+				if (pve) {
+					msg 		= "Shutting PVE Off. In PVP Mode";
+					this.serverPveSet(0, msg);
+					this.console(msg);
+				}
 			break;
 
 			case 'pve':
-				if (!pve) this.serverPveSet(1);
+				if (!pve) {
+					msg 		= "Shutting PVP Off. In PVE Mode";
+					this.serverPveSet(1, msg);
+					this.console(msg);
+				}
 			break;
 
 			case 'random':
-				var handler 	= new kuhlpvp_random_handler(this.data);
+				var handler 	= new visionPVP_random_handler(this.data);
 				if (handler.mode() != pve) this.serverPveSet(handler.mode());
 			break;
 
 			case 'interval':
-				var handler 	= new kuhlpvp_interval_handler(this.data);
+				var handler 	= new visionPVP_interval_handler(this.data);
 				if (handler.mode() != pve) this.serverPveSet(handler.mode());
 			break;
 
 			case 'event':
-				var handler 	= new kuhlpvp_event_handler(this.data);
+				var handler 	= new visionPVP_event_handler(this.data);
 				if (handler.mode() != pve) this.serverPveSet(handler.mode());
 			break;
 
 		}
 
-		return pve;
-	};
-
-
-	this.initData 		= function() {
-		this.tabe 		= this.data.GetDataTable("kuhlpvp");
+		return this.serverPveMode();
 	};
 
 
@@ -239,8 +249,32 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 	};
 
 
-	this.serverPveSet 		= function(newMode) {
-		this.console("Changed PVE mode to " + newMode);
+	/**
+	 * Set Server PVE Mode
+	 * @param  {Integer} newMode PVE Mode
+	 * @return {Boolean} Global.Server.pve
+	 */
+	this.serverPveSet 		= function(newMode, reason) {
+		var global 				= importNamespace("");
+		var server 				= global.server;
+
+		var oldMode 			= server.pve;
+		server.pve 				= newMode;
+		var changed 			= (oldMode != newMode);
+		var currentMode 		= server.pve;
+
+		if (currentMode == 1) {
+			this.rust.BroadcastChat("Server", reason);
+		} else {
+			this.rust.BroadcastChat("Server", reason);
+		}
+
+		if (changed) {
+			this.console("New Mode: " + newMode);
+			this.console("Changed PVE mode to " + this.serverPveMode());
+		}
+
+		return currentMode;
 	};
 
 
@@ -260,22 +294,22 @@ var kuhlpvp_api 		= function(pluginObject, configObject, dataObject, rust) {
 	 * @return {Void}
 	 */
 	this.console 		= function(text) {
-		print("-- KuhlPVP: " + text);
+		print("-- visionPVP: " + text);
 	};
 
 
 	/**
 	 * Return this as an initialized object
 	 */
-	return this.init(pluginObject, configObject, dataObject, rust);
+	return this.init(pluginObject, configObject, rust, data);
 };
 
 
 /**
  * Time API
- * @return {kuhlpvp_time_api}
+ * @return {visionPVP_time_api}
  */
-var kuhlpvp_time_api 	= function() {
+var visionPVP_time_api 	= function() {
 
 	/**
 	 * Rust TOD_Sky Object
@@ -342,14 +376,50 @@ var kuhlpvp_time_api 	= function() {
 /**
  * PVP Mode Type
  * @param  {String}
- * @return {kuhlpvp_pvpmode_type}
+ * @return {visionPVP_pvpmode_type}
  */
-var kuhlpvp_pvpmode_type		= function(typeName) {
+var visionPVP_pvpmode_type		= function(typeName) {
 
+	/**
+	 * Numeric Value of Mode
+	 * @type {Integer}
+	 */
 	this.value 			= 0;
+
+
+	/**
+	 * Friendly Name of Mode
+	 * @type {String}
+	 */
 	this.label 			= '';
+
+
+	/**
+	 * System Name of Mode
+	 * @type {String}
+	 */
 	this.name 			= '';
 
+
+	/**
+	 * Reason
+	 * @type {String}
+	 */
+	this.reason 		= '';
+
+
+	/**
+	 * Initialize
+	 * @param  {String} typeName Can be the following:
+	 * - pvp
+	 * - pve
+	 * - pvp-night
+	 * - pvp-day
+	 * - random 	// Not Implemented
+	 * - event 		// Not Implemented
+	 * - interval 	// Not Implemented
+	 * @return {Void}
+	 */
 	this.init 			= function(typeName) {
 		var compStr 	= typeName.toLowerCase().replace(" ", "");
 
@@ -400,16 +470,28 @@ var kuhlpvp_pvpmode_type		= function(typeName) {
 		}
 	};
 
+
+	/**
+	 * Return initialized self
+	 */
 	return this.init(typeName);
 };
 
 
-var kuhlpvp_random_handler		= function(dataObject) {
+/**
+ * Random PVP Mode Handler
+ * @todo Not Implemented
+ * @param  {Oxide.DataFile} dataObject API Data
+ * @return {visionPVP_random_handler}
+ */
+var visionPVP_random_handler		= function(dataObject, engine) {
 
 	this.data 			= {};
+	this.engine 		= {};
 
-	this.init 			= function(dataObject) {
-		this.data = dataObject;
+	this.init 			= function(dataObject, engine) {
+		this.data 		= dataObject;
+		this.engine		= engine;
 	};
 
 
@@ -417,15 +499,24 @@ var kuhlpvp_random_handler		= function(dataObject) {
 
 	};
 
-	return this.init(dataObject);
+	return this.init(dataObject, engine);
 };
 
-var kuhlpvp_interval_handler	= function(dataObject) {
+
+/**
+ * Interval PVP Mode Handler
+ * @todo Not Implemented
+ * @param  {Oxide.DataFile} dataObject API Data
+ * @return {visionPVP_interval_handler}
+ */
+var visionPVP_interval_handler	= function(dataObject, engine) {
 
 	this.data 			= {};
+	this.engine 		= {};
 
-	this.init 			= function(dataObject) {
+	this.init 			= function(dataObject, engine) {
 		this.data = dataObject;
+		this.engine		= engine;
 	};
 
 
@@ -433,22 +524,31 @@ var kuhlpvp_interval_handler	= function(dataObject) {
 
 	};
 
-	return this.init(dataObject);
+	return this.init(dataObject, engine);
 };
 
-var kuhlpvp_event_handler		= function(dataObject) {
+
+/**
+ * Event PVP Mode Handler
+ * @todo Not Implemented
+ * @param  {Oxide.DataFile} dataObject API Data
+ * @return {visionPVP_event_handler}
+ */
+var visionPVP_event_handler		= function(dataObject, engine) {
 
 	this.data 			= {};
+	this.engine 		= {};
 
-	this.init 			= function(dataObject) {
+	this.init 			= function(dataObject, engine) {
 		this.data = dataObject;
+		this.engine		= engine;
 	};
 
 	this.mode 			= function() {
 
 	};
 
-	return this.init();
+	return this.init(dataobject, engine);
 };
 
 
@@ -456,58 +556,69 @@ var kuhlpvp_event_handler		= function(dataObject) {
  * Oxide Interop Object
  * @type {Object}
  */
-var kuhlpvp = {
+var visionPVP = {
 
-    Title: 			"kuhlPVP",
+
+	/**
+	 * Oxide Plugin Variables
+	 */
+    Title: 			"visionPVP",
     Author: 		"VisionMise",
     Version: 		V(0, 1, 1),
     HasConfig: 		true,
     api: 			"",
     ready: 			false,
 
+
+    /**
+     * Init Oxide Hook
+     */
     Init: 					function () {
-    	this.api 	= new kuhlpvp_api(this.Plugin, this.Config, datafile, rust);
-    	this.ready 	= true;
+    	this.api 	= new visionPVP_api(this.Plugin, this.Config, rust, data);
+    	this.ready 	= true;    
     },
 
-    OnServerInitialized: 	function () {
-    	var prefix 			= "kuhlpvp";
 
-        var consoleCommands = {
-        	'test': 		'test',
-        	'time': 		'timeOfDay'
-        };
+    /**
+     * OnServerInitialized Oxide Hook
+     */
+    OnServerInitialized: 	function () {
+    	var prefix 			= "visionPVP";
+        var consoleCommands = {};
+        var chatCommands 	= {};
 
         for (var cmd in consoleCommands) {
         	var name 	= prefix + "." + cmd;
         	var func 	= consoleCommands[cmd];
 
         	command.AddConsoleCommand(name, this.Plugin, func);
-        	print("-- KuhlPVP: Added Console Command (" + name + ")");
+        	print("-- visionPVP: Added Console Command (" + name + ")");
+        }
+
+        for (var cmd in chatCommands) {
+        	var name 	= prefix + "." + cmd;
+        	var func 	= chatCommands[cmd];
+
+        	command.AddChatCommand(name, this.Plugin, func);
+        	print("-- visionPVP: Added Chat Command (" + name + ")");
         }
     },
 
+
+    /**
+     * OnTick Oxide Hook
+     */
     OnTick: 				function() {
     	if (this.ready) this.api.timerTick();
     },
 
+
+    /**
+     * LoadDefaultConfig Oxide Hook
+     */
     LoadDefaultConfig: 		function () {
     	this.Config.Settings 	= this.Config.Settings || {
     		"pvpMode": 		"pvp"
     	};
-    },
-
-
-
-
-
-    /** for testing -- needs removed **/
-    test: function(param) {
-    	this.api.tester(param.Args);
-    },
-
-    timeOfDay: function() {
-    	var apiTime = new kuhlpvp_time_api();
-    	print("The Time is " + apiTime.time());
     }
 };
