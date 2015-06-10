@@ -3,11 +3,15 @@
  *
  * @author 			VisionMise
  * @version  		0.1.1
- * @description 	First Working Version :: Please README.md for More Information
+ * @description 	First Working Version :: Please see website for more information
+ * 
+ * @source 			https://github.com/VisionMise/visionPVP/releases/tag/v0.1.1
+ * @website			http://visionmise.github.io/visionPVP/
  * 
  * @param  {Oxide.Plugin} 	pluginObject
  * @param  {Oxide.Config} 	configObject
  * @param  {Oxide.rust}		rust
+ * @param  {Oxide.DataFile}	data
  * @return {visionPVP_api}
  */
 var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
@@ -75,6 +79,7 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 	 *@param  {Oxide.Plugin} 	pluginObject
  	 *@param  {Oxide.Config} 	configObject
  	 *@param  {Oxide.rust}		rust
+ 	 *@param  {Oxide.DataFile}	data
 	 *@return {this}
 	 */
 	this.init 			= function(pluginObject, configObject, rust, data) {
