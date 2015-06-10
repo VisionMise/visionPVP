@@ -1,9 +1,14 @@
 # visionPVP
-###### version 0.1.1a
-##### Available At: http://visionmise.github.io/visionPVP/
----
+###### version 0.1.2a 
 
-A Rust Oxide Plugin
+---
+Available at 
+[visionmise.github.io/visionPVP](http://visionmise.github.io/visionPVP/)
+
+A Plugin for OxideMode for Rust
+
+[oxidemod.org](http://oxidemod.org)
+
 
 ---
 

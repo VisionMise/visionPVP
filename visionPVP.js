@@ -2,10 +2,10 @@
  * VisionPVP
  *
  * @author 			VisionMise
- * @version  		0.1.1
+ * @version  		0.1.2
  * @description 	First Working Version :: Please see website for more information
  * 
- * @source 			https://github.com/VisionMise/visionPVP/releases/tag/v0.1.1
+ * @source 			https://github.com/VisionMise/visionPVP/releases/tag/v0.1.2
  * @website			http://visionmise.github.io/visionPVP/
  * 
  * @param  {Oxide.Plugin} 	pluginObject
@@ -569,7 +569,7 @@ var visionPVP = {
 	 */
     Title: 			"visionPVP",
     Author: 		"VisionMise",
-    Version: 		V(0, 1, 1),
+    Version: 		V(0, 1, 2),
     HasConfig: 		true,
     api: 			"",
     ready: 			false,
