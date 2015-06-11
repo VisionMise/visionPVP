@@ -724,8 +724,7 @@ var visionPVP = {
      * Init Oxide Hook
      */
     Init: 					function () {
-    	this.engine 	= new visionPVP_engine(this.Plugin, this.Config, rust, data, this.prefix);
-    	this.ready 		= true;    
+    	  
     },
 
 
@@ -733,6 +732,10 @@ var visionPVP = {
      * OnServerInitialized Oxide Hook
      */
     OnServerInitialized: 	function () {
+
+    	this.engine 	= new visionPVP_engine(this.Plugin, this.Config, rust, data, this.prefix);
+    	this.ready 		= true;  
+    	
         var consoleCommands = {
         	'pvp': 			'setPvpMode'
         };
