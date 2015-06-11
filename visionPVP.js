@@ -634,7 +634,7 @@ var visionPVP = {
 	 */
     Title: 			"visionPVP",
     Author: 		"VisionMise",
-    Version: 		V(0, 1, 1),
+    Version: 		V(0, 1, 2),
     HasConfig: 		true,
 
 

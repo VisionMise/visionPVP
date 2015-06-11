@@ -17,9 +17,9 @@ A Plugin for OxideMode for Rust
 
 visionPVP allows PVP and PVE to be controlled by time of day, or static modes. visionPVP currently supports 4 modes
 
-- PVP: PVP is enabled all of the time (Default Mode)
+- PVP: PVP is enabled all of the time 
 - PVE: PVP is disabled all of the time
-- Night Mode: PVP is only enabled at night
+- Night Mode: PVP is only enabled at night (Default Mode)
 - Day Mode: PVP is only enabled during the day
 
 ---
@@ -27,7 +27,7 @@ visionPVP allows PVP and PVE to be controlled by time of day, or static modes. v
 ##### Sample Config
 
     "Settings": {
-      "pvpMode": "pvp-day"
+      "pvpMode": "pvp-night"
     }
 
 ---
