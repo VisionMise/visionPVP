@@ -9,9 +9,9 @@
  * @param  {Oxide.Plugin} 	pluginObject
  * @param  {Oxide.Config} 	configObject
  * @param  {Oxide.rust}		rust
- * @return {visionPVP_api}
+ * @return {visionPVP_engine}
  */
-var visionPVP_api 		= function(pluginObject, configObject, rust, data, prefix) {
+var visionPVP_engine 				= function(pluginObject, configObject, rust, data, prefix) {
 
 	/**
 	 * Prefix
@@ -22,7 +22,7 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data, prefix) {
 
 	/**
 	 * Time API
-	 * @type {visionPVP_time_api}
+	 * @type {visionPVP_time_object}
 	 */
 	this.time 			= {};
 
@@ -131,9 +131,9 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data, prefix) {
 
 		/**
 		 * Time API
-		 * @type {visionPVP_time_api}
+		 * @type {visionPVP_time_object}
 		 */
-		this.time 		= new visionPVP_time_api();
+		this.time 		= new visionPVP_time_object();
 
 
 		/**
@@ -233,18 +233,23 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data, prefix) {
 			break;
 
 			case 'random':
-				var handler 	= new visionPVP_random_handler(this.data);
-				if (handler.mode() != pve) this.serverPveSet(handler.mode());
+				var handler 	= new visionPVP_random_handler(this.table, this);
+				this.serverPveSet(handler.mode());
 			break;
 
 			case 'interval':
-				var handler 	= new visionPVP_interval_handler(this.data);
-				if (handler.mode() != pve) this.serverPveSet(handler.mode());
+				var handler 	= new visionPVP_interval_handler(this.table, this);
+				this.serverPveSet(handler.mode());
 			break;
 
 			case 'event':
-				var handler 	= new visionPVP_event_handler(this.data);
-				if (handler.mode() != pve) this.serverPveSet(handler.mode());
+				var handler 	= new visionPVP_event_handler(this.table, this);
+				this.serverPveSet(handler.mode());
+			break;
+
+			case 'hour':
+				var handler 	= new visionPVP_hour_handler(this.table, this);
+				this.serverPveSet(handler.mode());
 			break;
 
 		}
@@ -376,10 +381,10 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data, prefix) {
 
 
 /**
- * Time API
- * @return {visionPVP_time_api}
+ * Time Object
+ * @return {visionPVP_time_object}
  */
-var visionPVP_time_api 	= function() {
+var visionPVP_time_object 			= function() {
 
 	/**
 	 * Rust TOD_Sky Object
@@ -479,6 +484,13 @@ var visionPVP_pvpmode_type		= function(typeName) {
 
 
 	/**
+	 * PVE 
+	 * @type {Boolean}
+	 */
+	this.pve 			= false;
+
+
+	/**
 	 * Initialize
 	 * @param  {String} typeName Can be the following:
 	 * - pvp
@@ -499,24 +511,28 @@ var visionPVP_pvpmode_type		= function(typeName) {
 				this.value 	= 0;
 				this.label 	= 'PVE';
 				this.name 	= 'pve';
+				this.pve 	= true;
 			break;
 
 			case 'pvp-day':
-				this.value 	= 1;
+				this.value 	= 2;
 				this.label 	= 'Daytime PVP';
 				this.name 	= 'pvp-day';
+				this.pve 	= false;
 			break;
 
 			case 'pvp-night':
-				this.value 	= 2;
+				this.value 	= 3;
 				this.label 	= 'Nighttime PVP';
 				this.name 	= 'pvp-night';
+				this.pve 	= false;
 			break;
 
 			case 'pvp':
-				this.value 	= 3;
+				this.value 	= 1;
 				this.label 	= 'PVP';
 				this.name 	= 'pvp';
+				this.pve 	= false;
 			break;
 
 			case 'random':
@@ -537,6 +553,13 @@ var visionPVP_pvpmode_type		= function(typeName) {
 				this.name 	= 'event';
 			break;
 
+			case 'hour':
+				this.value 	= 6;
+				this.label 	= 'During Time';
+				this.name 	= 'hour';
+				this.pve 	= true;
+			break;
+
 		}
 	};
 
@@ -554,7 +577,7 @@ var visionPVP_pvpmode_type		= function(typeName) {
  * @param  {Oxide.DataFile} dataObject API Data
  * @return {visionPVP_random_handler}
  */
-var visionPVP_random_handler		= function(dataObject, engine) {
+var visionPVP_random_handler	= function(dataObject, engine) {
 
 	this.data 			= {};
 	this.engine 		= {};
@@ -623,6 +646,56 @@ var visionPVP_event_handler		= function(dataObject, engine) {
 
 
 /**
+ * Hour PVP mode Handler
+ * @todo Not Implemented
+ * @param  {Oxide.DataFile} dataObject 
+ * @param  {visionPVP_engine} 	engine
+ * @return {visionPVP_hour_handler}
+ */
+var visionPVP_hour_handler 		= function(dataObject, engine) {
+
+	this.data 			= {};
+	this.engine 		= {};
+
+	this.init 					= function(dataObject, engine) {
+		this.data 		= dataObject;
+		this.engine		= engine;
+	};
+
+	this.createHandler			= function(startHour, stopHour, pve) {
+		var mode 						= new visionPVP_pvpmode_type(!pve);
+		this.data.hour_handler.start 	= startHour;
+		this.data.hour_handler.stop 	= stopHour;
+		this.data.hour_handler.mode 	= mode.value;
+		this.data.hour_handler.enabled 	= true;
+
+		engine.data.SaveData(engine.prefix);
+	};
+
+	this.mode 					= function() {
+
+		if (!this.data.hour_handler || (this.data.hour_handler.enabled == false)) {
+			return this.engine.serverPveMode();
+		}
+
+		var startHour 			= this.data.hour_handler.start;
+		var stopHour 			= this.data.hour_handler.stop;
+		var currentHour 		= this.engine.time.hour();
+
+		var activeMode 			= new visionPVP_pvpmode_type(this.data.hour_handler.mode);
+
+		if (currentHour >= startHour && currentHour <= stopHour) {
+			return activeMode.pve;
+		} else {
+			return !activeMode.pve;
+		}
+	};
+
+	return this.init(dataobject, engine);
+};
+
+
+/**
  * Oxide Interop Object
  * @type {Object}
  */
@@ -641,7 +714,7 @@ var visionPVP = {
     /**
      * API Variables
      */
-    api: 			"",
+    engine: 		"",
     ready: 			false,
     prefix: 		"visionPVP",
     modes: 			['pvp', 'pve', 'pvp-night', 'pvp-day'],
@@ -651,8 +724,8 @@ var visionPVP = {
      * Init Oxide Hook
      */
     Init: 					function () {
-    	this.api 	= new visionPVP_api(this.Plugin, this.Config, rust, data, this.prefix);
-    	this.ready 	= true;    
+    	this.engine 	= new visionPVP_engine(this.Plugin, this.Config, rust, data, this.prefix);
+    	this.ready 		= true;    
     },
 
 
@@ -690,7 +763,7 @@ var visionPVP = {
      * OnTick Oxide Hook
      */
     OnTick: 				function() {
-    	if (this.ready) this.api.timerTick();
+    	if (this.ready) this.engine.timerTick();
     },
 
 
@@ -714,7 +787,7 @@ var visionPVP = {
 	     * @return {Void} 
 	     */
 	    getPvpMode: 			function(player, cmd, args) {
-	    	var pvp 	= this.api.serverPvpMode();
+	    	var pvp 	= this.engine.serverPvpMode();
 	    	var mode 	= (pvp.value == 0) ? ["PVE","Players cannot hurt other players."] : ["PVP", "Players can kill you!"];
 	    	rust.SendChatMessage(player, this.prefix, "The Current Server Mode is " + mode[0] + ". " + mode[1] + " " + pvp.reason);
 	    },
@@ -737,7 +810,7 @@ var visionPVP = {
 	    	}
 
 	    	var modeStr 		= param.Args[0];
-	    	if (this.api.pvpSet(modeStr)) {
+	    	if (this.engine.pvpSet(modeStr)) {
 	    		this.SaveConfig();
 	    	}
 	    }
