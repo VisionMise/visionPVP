@@ -3,18 +3,22 @@
  *
  * @author 			VisionMise
  * @version  		0.1.2
- * @description 	First Working Version :: Please see website for more information
- * 
- * @source 			https://github.com/VisionMise/visionPVP/releases/tag/v0.1.2
- * @website			http://visionmise.github.io/visionPVP/
+ * @description 	First Working Version :: Please README.md for More Information
+ * @url 			http://visionmise.github.io/visionPVP/
  * 
  * @param  {Oxide.Plugin} 	pluginObject
  * @param  {Oxide.Config} 	configObject
  * @param  {Oxide.rust}		rust
- * @param  {Oxide.DataFile}	data
  * @return {visionPVP_api}
  */
-var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
+var visionPVP_api 		= function(pluginObject, configObject, rust, data, prefix) {
+
+	/**
+	 * Prefix
+	 * @type {String}
+	 */
+	this.prefix 		= '';
+
 
 	/**
 	 * Time API
@@ -79,15 +83,21 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 	 *@param  {Oxide.Plugin} 	pluginObject
  	 *@param  {Oxide.Config} 	configObject
  	 *@param  {Oxide.rust}		rust
- 	 *@param  {Oxide.DataFile}	data
+ 	 *@param  {String}			prefix
 	 *@return {this}
 	 */
-	this.init 			= function(pluginObject, configObject, rust, data) {
+	this.init 			= function(pluginObject, configObject, rust, data, prefix) {
+
+		/**
+		 * Name
+		 */
+		this.prefix 	= prefix;
+
 
 		/**
 		 * Print Startup
 		 */
-		this.console("visionPVP Started");
+		this.console(this.prefix + " Started");
 
 
 		/**
@@ -116,7 +126,7 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 		 * @type {Oxide.DataFile}
 		 */
 		this.data 		= data;
-		this.table 		= this.data.GetData("visionPVP") || {};
+		this.table 		= this.data.GetData(this.prefix) || {};
 		
 
 		/**
@@ -129,9 +139,9 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 		/**
 		 * Set PVP Mode
 		 */
-		var pvpModeStr 	= configObject.Settings['pvpMode'];
+		var pvpModeStr 	= this.config.Settings['pvpMode'];
 		this.pvpMode 	= new visionPVP_pvpmode_type(pvpModeStr);
-		this.console("visionPVP Mode set to " + this.pvpMode.label);
+		this.console(this.prefix + " Mode set to " + this.pvpMode.label);
 
 
 		/**
@@ -174,7 +184,7 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 
 		switch (this.pvpMode.name) {
 
-			case 'pvp_night':
+			case 'pvp-night':
 				if (this.time.isDay()) {
 					if (!pve) {
 						msg 	= "Shutting PVP Off. Its Daytime"
@@ -190,7 +200,7 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 				}
 			break;
 
-			case 'pvp_day':
+			case 'pvp-day':
 				if (this.time.isNight()) {
 					if (!pve) {
 						msg 	= "Shutting PVP Off. Its Night";
@@ -255,6 +265,15 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 
 
 	/**
+	 * Server PVP Mode
+	 * @return {visionPVP_pvpmode_type}
+	 */
+	this.serverPvpMode 		= function() {
+		return this.pvpMode;
+	}
+
+
+	/**
 	 * Set Server PVE Mode
 	 * @param  {Integer} newMode PVE Mode
 	 * @return {Boolean} Global.Server.pve
@@ -269,9 +288,9 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 		var currentMode 		= server.pve;
 
 		if (currentMode == 1) {
-			this.rust.BroadcastChat("Server", reason);
+			this.rust.BroadcastChat(this.prefix, reason);
 		} else {
-			this.rust.BroadcastChat("Server", reason);
+			this.rust.BroadcastChat(this.prefix, reason);
 		}
 
 		if (changed) {
@@ -280,6 +299,40 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 		}
 
 		return currentMode;
+	};
+
+
+	/**
+	 * pvpSet
+	 * @param  {String} 		newMode 
+	 * @return {Boolean}		True on Success
+	 */
+	this.pvpSet 		= function(newMode) {
+		var mode 		= new visionPVP_pvpmode_type(newMode);
+
+		if (this.updateConfig('pvpMode', mode.name)) {
+			var msg 		= "Changed PVP Configuration to " + mode.label;
+			this.pvpMode 	= mode;
+
+			this.console(msg).broadcast(msg);
+			return true;
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * updateConfig
+	 * @param  {String} 	key
+	 * @param  {Mixed} 		value
+	 * @return {Boolean} 	True on Update
+	 */
+	this.updateConfig		= function(key, value) {
+		if (!key || !value) return false;
+
+		this.config.Settings[key]	= value;
+		return true;
 	};
 
 
@@ -299,14 +352,26 @@ var visionPVP_api 		= function(pluginObject, configObject, rust, data) {
 	 * @return {Void}
 	 */
 	this.console 		= function(text) {
-		print("-- visionPVP: " + text);
+		print(this.prefix + ": " + text);
+		return this;
+	};
+
+
+	/**
+	 * Broadcast Global Chat
+	 * @param  {String} text 
+	 * @return {Void}      
+	 */
+	this.broadcast 		= function(text) {
+		this.rust.BroadcastChat(this.prefix, text);
+		return this;
 	};
 
 
 	/**
 	 * Return this as an initialized object
 	 */
-	return this.init(pluginObject, configObject, rust, data);
+	return this.init(pluginObject, configObject, rust, data, prefix);
 };
 
 
@@ -438,14 +503,14 @@ var visionPVP_pvpmode_type		= function(typeName) {
 
 			case 'pvp-day':
 				this.value 	= 1;
-				this.label 	= 'PVE at Night';
-				this.name 	= 'pvp_day';
+				this.label 	= 'Daytime PVP';
+				this.name 	= 'pvp-day';
 			break;
 
 			case 'pvp-night':
 				this.value 	= 2;
-				this.label 	= 'PVP at Night';
-				this.name 	= 'pvp_night';
+				this.label 	= 'Nighttime PVP';
+				this.name 	= 'pvp-night';
 			break;
 
 			case 'pvp':
@@ -569,17 +634,24 @@ var visionPVP = {
 	 */
     Title: 			"visionPVP",
     Author: 		"VisionMise",
-    Version: 		V(0, 1, 2),
+    Version: 		V(0, 1, 1),
     HasConfig: 		true,
+
+
+    /**
+     * API Variables
+     */
     api: 			"",
     ready: 			false,
+    prefix: 		"visionPVP",
+    modes: 			['pvp', 'pve', 'pvp-night', 'pvp-day'],
 
 
     /**
      * Init Oxide Hook
      */
     Init: 					function () {
-    	this.api 	= new visionPVP_api(this.Plugin, this.Config, rust, data);
+    	this.api 	= new visionPVP_api(this.Plugin, this.Config, rust, data, this.prefix);
     	this.ready 	= true;    
     },
 
@@ -588,24 +660,28 @@ var visionPVP = {
      * OnServerInitialized Oxide Hook
      */
     OnServerInitialized: 	function () {
-    	var prefix 			= "visionPVP";
-        var consoleCommands = {};
-        var chatCommands 	= {};
+        var consoleCommands = {
+        	'pvp': 			'setPvpMode'
+        };
+
+        var chatCommands 	= {
+        	'pvp': 			'getPvpMode'
+        };
 
         for (var cmd in consoleCommands) {
-        	var name 	= prefix + "." + cmd;
+        	var name 	= this.prefix + "." + cmd;
         	var func 	= consoleCommands[cmd];
 
         	command.AddConsoleCommand(name, this.Plugin, func);
-        	print("-- visionPVP: Added Console Command (" + name + ")");
+        	print("-- " + this.prefix + ": Added Console Command (" + name + ")");
         }
 
         for (var cmd in chatCommands) {
-        	var name 	= prefix + "." + cmd;
+        	var name 	= cmd;
         	var func 	= chatCommands[cmd];
 
         	command.AddChatCommand(name, this.Plugin, func);
-        	print("-- visionPVP: Added Chat Command (" + name + ")");
+        	print("-- " + this.prefix + ": Added Chat Command (" + name + ")");
         }
     },
 
@@ -625,5 +701,45 @@ var visionPVP = {
     	this.Config.Settings 	= this.Config.Settings || {
     		"pvpMode": 		"pvp"
     	};
-    }
+    },
+
+
+    /** Chat Commands */
+
+	    /**
+	     * getPvpMode
+	     * @param  {Oxide.Player} 	player 
+	     * @param  {String} 		cmd    
+	     * @param  {Array} 			args   
+	     * @return {Void} 
+	     */
+	    getPvpMode: 			function(player, cmd, args) {
+	    	var pvp 	= this.api.serverPvpMode();
+	    	var mode 	= (pvp.value == 0) ? ["PVE","Players cannot hurt other players."] : ["PVP", "Players can kill you!"];
+	    	rust.SendChatMessage(player, this.prefix, "The Current Server Mode is " + mode[0] + ". " + mode[1] + " " + pvp.reason);
+	    },
+
+
+    /** Console Commands */
+
+
+    	/**
+    	 * setPvpMode
+    	 * @param {Oxide.Object} param
+    	 */
+	    setPvpMode: 			function(param) {
+	    	if (!param.Args) {
+	    		print("No Mode Set");
+	    		print("Usage: ");
+	    		print(this.prefix + ".pvp pvp-night");
+	    		print("The available modes are " + this.modes.join(', '));
+	    		return false;
+	    	}
+
+	    	var modeStr 		= param.Args[0];
+	    	if (this.api.pvpSet(modeStr)) {
+	    		this.SaveConfig();
+	    	}
+	    }
+
 };
