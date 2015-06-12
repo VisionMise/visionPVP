@@ -1,0 +1,25 @@
+{
+	"lang": "en",
+	"name": "VisionPVP",
+	"short_name": "Vision",
+	"icons": [{
+	    "src": "icon/lowres",
+	    "sizes": "24x24 32x32 48x48 64x64 96x96 112x112 256x256 512x512",
+	    "type": "image/webp"
+	}],
+	"splash_screens": [{
+	    "src": "splash/lowres",
+	    "sizes": "320x240"
+	  }, {
+	    "src": "splash/hd_small",
+	    "sizes": "1334x750"
+	  }, {
+	    "src": "splash/hd_hi",
+	    "sizes": "1920x1080",
+	    "density": 3
+	  }],
+	"start_url": "index.html",
+	"display": "standalone",
+	"orientation": "portrait",
+	"theme_color": "aliceblue"
+}

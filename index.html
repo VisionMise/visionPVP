@@ -8,13 +8,21 @@
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+
+    <link rel="manifest" href="web.manifest">
+    <link rel="icon" size="16x16 24x24 32x32 48x48 64x64 72x72 96x96" href="img/visionpvp-logo.ico">
+    <meta name="VisionPVP" content="OxideMod Plugin">
+
   </head>
   <body>
     <div class="wrapper">
       <header>
+        <img src="img/visionpvp-logo.256.png">
         <h1>
           visionPVP
             <small>
@@ -23,7 +31,11 @@
         </h1>
         <p>A Rust Oxide Plugin</p>
 
-        <p class="view"><a href="https://github.com/VisionMise/visionPVP">View the Project on GitHub <small>VisionMise/visionPVP</small></a></p>
+        <p class="view">
+        	<a href="https://github.com/VisionMise/visionPVP">View the Project on GitHub <small>VisionMise/visionPVP</small></a>
+        	<br>
+        	<a href="https://github.com/VisionMise/visionPVP/issues/new">Report an Issue <small>VisionMise/visionPVP/issues</small></a>
+    	</p>
 
 
         <ul>
@@ -53,9 +65,29 @@
 <hr>
 
 <h5>
+<a id="chat" class="anchor" href="#chat" aria-hidden="true"><span class="octicon octicon-link"></span></a>Chat Commands</h5>
+<pre>/pvp</pre>
+<p>
+Prints the current Server PVP Mode to chat. Available to all players
+</p>
+<hr>
+
+<h5>
+<a id="console" class="anchor" href="#console" aria-hidden="true"><span class="octicon octicon-link"></span></a>Console Commands</h5>
+<pre>visionPVP.pvp &lt;setting&gt;</pre>
+<p>
+	Updates the server configuration from the console or RCON
+	<br>
+	Example:
+	<pre>visionPVP.pvp pvp-night</pre>
+</p>
+<hr>
+
+
+<h5>
 <a id="modes" class="anchor" href="#modes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Modes</h5>
 
-<div>Valid values for config are as follows:</div>
+<div>Valid values for config or for console command are as follows:</div>
 
 <pre>pvp-day
 pvp-night
