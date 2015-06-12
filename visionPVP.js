@@ -49,13 +49,6 @@ var visionPVP_engine 				= function(pluginObject, configObject, rust, data, pref
 
 
 	/**
-	 * Table
-	 * @type {Oxide.DataFile.Table}
-	 */
-	this.table 			= {};	
-
-
-	/**
 	 * Global Data Object
 	 * @type {Oxide.DataFile}
 	 */
@@ -126,7 +119,6 @@ var visionPVP_engine 				= function(pluginObject, configObject, rust, data, pref
 		 * @type {Oxide.DataFile}
 		 */
 		this.data 		= data;
-		this.table 		= this.data.GetData(this.prefix) || {};
 		
 
 		/**
@@ -346,6 +338,9 @@ var visionPVP_engine 				= function(pluginObject, configObject, rust, data, pref
 	 * @return {Void}
 	 */
 	this.tester 		= function(param) {
+
+		var d = new visionPVP_data(this);
+		this.console(d.set("test", ["test-value"]));
 		this.console('Test Result: ' + param.length + ' arguments passed');
 	};
 
@@ -377,6 +372,43 @@ var visionPVP_engine 				= function(pluginObject, configObject, rust, data, pref
 	 * Return this as an initialized object
 	 */
 	return this.init(pluginObject, configObject, rust, data, prefix);
+};
+
+
+var visionPVP_data 					= function(engine) {
+
+	this.prefix 			= '';
+	this.engine 			= {};
+	this.table 				= {};
+
+	this.init 				= function(engine) {
+		this.engine 		= engine;
+		this.prefix 		= this.engine.prefix;
+		this.table 			= this.engine.data.GetData(this.prefix) || {};
+
+		return this;
+	};
+
+	this.get 				= function(key) {
+		if (key) return this.table[key];
+		return this.table;
+	};
+
+	this.set 				= function(key, value) {
+		if (!key || !value) return false;
+		this.table[key]		= value;
+
+		var ret = this.get(key);
+		if (ret == value) this.save();
+
+		return ret;
+	};
+
+	this.save 				= function() {
+		this.engine.data.SaveData(this.prefix);
+	};
+
+	return this.init(engine).table;
 };
 
 
@@ -708,6 +740,7 @@ var visionPVP = {
     Title: 			"visionPVP",
     Author: 		"VisionMise",
     Version: 		V(0, 1, 2),
+    ResourceId: 	1135,
     HasConfig: 		true,
 
 
@@ -737,7 +770,8 @@ var visionPVP = {
     	this.ready 		= true;  
     	
         var consoleCommands = {
-        	'pvp': 			'setPvpMode'
+        	'pvp': 			'setPvpMode',
+        	'test': 		'test'
         };
 
         var chatCommands 	= {
@@ -798,6 +832,9 @@ var visionPVP = {
 
     /** Console Commands */
 
+    	test: 					function(param) {
+    		this.engine.tester(param.Args || {});
+    	},
 
     	/**
     	 * setPvpMode

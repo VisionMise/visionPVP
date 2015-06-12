@@ -1,6 +1,13 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
+### Version 0.1.3a
+
+Codebase
+
+OxideMod Plugin
+-Added Resource ID to work with Updater Plugin
+
 ### Version 0.1.2a
 
 Codebase
