@@ -5,12 +5,13 @@
 
 Enhancements
 - Added Resource ID to work with Updater Plugin
-- Added Data Handler 
+- Added Data Handler
 
 Bugs / Code Changes
 - Fixed PVP Chat Command Bug #8
 - Fixed console loop error from Bug #12
 -- Namespace for server was changed from root to 'ConVar'
+-- Server namespace now case sensitive (updated to 'Server')
 
 ### Version 0.1.2a
 
