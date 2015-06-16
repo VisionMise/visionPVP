@@ -256,7 +256,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      */
     this.serverPveMode      = function() {
         var global              = importNamespace("ConVar");
-        var server              = global.server;
+        var server              = global.Server;
         return server.pve;
     };
 
@@ -277,7 +277,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      */
     this.serverPveSet       = function(newMode, reason) {
         var global              = importNamespace("ConVar");
-        var server              = global.server;
+        var server              = global.Server;
 
         var oldMode             = server.pve;
         server.pve              = newMode;
@@ -813,7 +813,7 @@ var visionPVP = {
      */
     LoadDefaultConfig:      function () {
         this.Config.Settings    = this.Config.Settings || {
-            "pvpMode":      "pvp"
+            "pvpMode":      "pvp-night"
         };
     },
 
@@ -832,10 +832,10 @@ var visionPVP = {
             var pvp     = false;
 
             if (pve == 1) {
-                var msg = "The server is in PVE Mode. Player cannot hurt other players.";
+                var msg = "The server is in PVE Mode. Players cannot hurt or kill other players.";
                 pvp = false;
             } else {
-                var msg = "The server is in PVP Mode. Player can hurt and kill other players.";
+                var msg = "The server is in PVP Mode. Players can hurt and kill other players.";
                 pvp = true;
             }
 
