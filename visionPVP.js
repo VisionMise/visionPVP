@@ -255,7 +255,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      * @return {Boolean}
      */
     this.serverPveMode      = function() {
-        var global              = importNamespace("");
+        var global              = importNamespace("ConVar");
         var server              = global.server;
         return server.pve;
     };
@@ -276,7 +276,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      * @return {Boolean} Global.Server.pve
      */
     this.serverPveSet       = function(newMode, reason) {
-        var global              = importNamespace("");
+        var global              = importNamespace("ConVar");
         var server              = global.server;
 
         var oldMode             = server.pve;

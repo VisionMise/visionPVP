@@ -9,6 +9,8 @@ Enhancements
 
 Bugs / Code Changes
 - Fixed PVP Chat Command Bug #8
+- Fixed console loop error from Bug #12
+-- Namespace for server was changed from root to 'ConVar'
 
 ### Version 0.1.2a
 
