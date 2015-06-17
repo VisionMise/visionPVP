@@ -1,6 +1,14 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
+### Version 0.1.4a
+
+Enhancements
+- Added new PVP mode 'Random'
+-- Updated config to include random pvp settings
+
+Bugs / Code Changes
+
 ### Version 0.1.3a
 
 Enhancements
