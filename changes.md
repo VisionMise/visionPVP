@@ -13,6 +13,7 @@ Bugs / Code Changes
 - Fixed Bug #17
 - Updated config to include random pvp settings
 - Implemented visionPVP_data for Random Mode Handler
+- Added random mode to engine
 
 ### Version 0.1.3a
 
