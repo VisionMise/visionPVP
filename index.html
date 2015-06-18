@@ -26,7 +26,7 @@
         <h1>
           visionPVP
             <small>
-              version 0.1.3a
+              version 0.1.4a
             </small>
         </h1>
         <p>A Rust Oxide Plugin</p>
@@ -60,6 +60,7 @@
 <li>PVE: PVP is disabled all of the time</li>
 <li>Night Mode: PVP is only enabled at night (Default Mode)</li>
 <li>Day Mode: PVP is only enabled during the day</li>
+<li>Random: PVP and PVE are toggled randomly</li>
 </ul>
 
 <hr>
@@ -76,10 +77,32 @@ Prints the current Server PVP Mode to chat. Available to all players
 <a id="console" class="anchor" href="#console" aria-hidden="true"><span class="octicon octicon-link"></span></a>Console Commands</h5>
 <pre>visionPVP.pvp &lt;setting&gt;</pre>
 <p>
-	Updates the server configuration from the console or RCON
+	Updates the pvp configuration from the console or RCON
 	<br>
 	Example:
 	<pre>visionPVP.pvp pvp-night</pre>
+</p>
+<pre>visionPVP.rnd</pre>
+<p>
+  Generates a random number of hours between the min and the max and 
+  sets the next pvp/pve toggle time to (the current time) + (the generated number of hours)
+  <br>
+  Example:
+  <pre>visionPVP.rnd</pre>
+</p>
+<pre>visionPVP.rndmin &lt;setting&gt;</pre>
+<p>
+  Updates the random minimum from the console or RCON. The range is 0 to 24.
+  <br>
+  Example:
+  <pre>visionPVP.rndmin 4</pre>
+</p>
+<pre>visionPVP.rndmax &lt;setting&gt;</pre>
+<p>
+  Updates the random maximum from the console or RCON. The range is 0 to 24.
+  <br>
+  Example:
+  <pre>visionPVP.rndmax 21</pre>
 </p>
 <hr>
 
@@ -92,7 +115,8 @@ Prints the current Server PVP Mode to chat. Available to all players
 <pre>pvp-day
 pvp-night
 pvp
-pve</pre>
+pve
+random</pre>
 </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/VisionMise">VisionMise</a></p>
