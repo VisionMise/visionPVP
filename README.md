@@ -21,6 +21,7 @@ visionPVP allows PVP and PVE to be controlled by time of day, or static modes. v
 - PVE: PVP is disabled all of the time
 - Night Mode: PVP is only enabled at night (Default Mode)
 - Day Mode: PVP is only enabled during the day
+- Random Mode: PVP and PVE are toggle randomly
 
 ---
 
