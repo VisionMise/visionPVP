@@ -1,6 +1,20 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
+### Version 0.1.4a
+
+Enhancements
+- Added new PVP mode 'Random'
+- Added new Console Command rnd
+- Added new Console Command rndmin
+- Added new Console Command rndmax
+
+Bugs / Code Changes
+- Fixed Bug #17
+- Updated config to include random pvp settings
+- Implemented visionPVP_data for Random Mode Handler
+- Added random mode to engine
+
 ### Version 0.1.3a
 
 Enhancements
