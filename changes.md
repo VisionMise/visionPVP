@@ -1,6 +1,27 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
+### Version 0.1.5a
+
+Enhancements
+- Added customizable messages for console and chat in config
+- Auto-Updater Enabled
+- New player warning feature (Broadcasts to all players that mode will change to [x] in [n] hours)
+-- Configurable in config
+
+Bugs / Code Changes
+- Fixed Bug #20
+- Moved configuration handling to engine object
+- Expanded random handler with more robust conditions
+-- Random min/max range must now be between 0-24
+- Added Resource Handler for string
+- Added config version checks
+-- Added config updater/builder
+- Added resource version checks
+-- Added resource updater/builder
+-- Added strings and errors
+- Cleaned up code by removing un-implemented extensions
+
 ### Version 0.1.4a
 
 Enhancements
