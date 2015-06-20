@@ -2,14 +2,14 @@
  * VisionPVP
  *
  * @author          VisionMise
- * @version         0.1.5
+ * @version         0.2.1
  * @description     Please README.md for More Information
  * @url             http://visionmise.github.io/visionPVP/
  */
 
 
-var engineVersion   = '0.1.5';
-var configVersion   = '1.3.3';
+var engineVersion   = '0.2.1';
+var configVersion   = '1.3.4';
 
 
 /**
@@ -161,6 +161,10 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
                 "minimum":          "1",
                 "maximum":          "12",
                 "player_warning":   "2"
+            },
+            "pvptime":      {
+                'pvp_start_time':   "18",
+                'pvp_stop_time':    "6"
             }
         };
 
@@ -366,8 +370,18 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             break;
 
             case 'random':
-                if (!this.handler) {
+                if (!this.handler || this.handler.type != 'visionPVP_random_handler') {
                     this.handler    = new visionPVP_random_handler(this.store, this);
+                }
+
+                var mode        = this.handler.mode();
+
+                this.serverPveSet(mode, this.handler.msg);
+            break;
+
+            case 'time':
+                if (!this.handler || this.handler.type != 'visionPVP_pvptime_handler') {
+                    this.handler    = new visionPVP_pvptime_handler(this.store, this);
                 }
 
                 var mode        = this.handler.mode();
@@ -703,7 +717,8 @@ var visionPVP_pvpmode_type          = function(typeName) {
      * - pve
      * - pvp-night
      * - pvp-day
-     * - random     // Not Implemented
+     * - random     
+     * - time
      * - event      // Not Implemented
      * - interval   // Not Implemented
      * @return {Void}
@@ -759,10 +774,10 @@ var visionPVP_pvpmode_type          = function(typeName) {
                 this.name   = 'event';
             break;
 
-            case 'hour':
+            case 'time':
                 this.value  = 6;
-                this.label  = 'During Time';
-                this.name   = 'hour';
+                this.label  = 'Time Based';
+                this.name   = 'time';
                 this.pve    = true;
             break;
 
@@ -791,6 +806,7 @@ var visionPVP_random_handler        = function(dataObject, engine) {
     this.nextHour       = 0;
     this.nextMode       = '';
     this.warned         = false;
+    this.type           = 'visionPVP_random_handler';
 
     this.init           = function(dataObject, engine) {
         this.data       = dataObject;
@@ -798,7 +814,7 @@ var visionPVP_random_handler        = function(dataObject, engine) {
 
         this.engine.config.Settings['random'] = this.engine.config.Settings['random'] || {
             'minimum':      1,
-            'maximum':      4
+            'maximum':      12
         };
 
         var lastHour    = this.data.get("last_change");
@@ -903,6 +919,63 @@ var visionPVP_random_handler        = function(dataObject, engine) {
 
 
 /**
+ * [visionPVP_pvptime_handler description]
+ * @param  {[type]} dataObject [description]
+ * @param  {[type]} engine     [description]
+ * @return {[type]}            [description]
+ */
+var visionPVP_pvptime_handler       = function(dataObject, engine) {
+
+    this.data           = {};
+    this.engine         = {};
+    this.msg            = "";
+    this.type           = 'visionPVP_pvptime_handler';
+
+    this.start          = 0;
+    this.stop           = 0;
+
+    this.init           = function(dataObject, engine) {
+        this.data       = dataObject;
+        this.engine     = engine;
+
+        this.engine.config.Settings['pvptime'] = this.engine.config.Settings['pvptime'] || {
+            'pvp_start_time':   16,
+            'pvp_stop_time':    8
+        };
+
+        this.start      = parseInt(this.engine.config.Settings['pvptime']['pvp_start_time']);
+        this.stop       = parseInt(this.engine.config.Settings['pvptime']['pvp_stop_time']);
+
+        return this;
+    };
+
+    this.mode           = function(dataObject, engine) {
+        var curHour     = this.engine.time.hour();
+        var pve         = this.engine.serverPveMode();
+
+        if (this.start > this.stop && curHour > this.stop) {
+            var stop    = this.stop + 24;
+            var start   = this.start;
+            var pvpon       = (curHour >= start && curHour < stop);
+            //var diff    = (stop - start);
+            //stop        = (start + diff);
+        } else {
+            var stop    = this.stop;
+            var start   = this.start;
+            var pvpon       = (curHour >= start || curHour < stop);
+        }
+
+        //var msg         = this.engine.resources.get('console', 'pvp_time');
+        //this.engine.console("Current: " + curHour + " Start: " + start + " Stop: " + stop + " On: " + pvpon);
+        
+        return (pvpon == false);
+    };
+
+    return this.init(dataObject, engine);
+};
+
+
+/**
  * visionPVP_resource Hanlder
  * @param  {visionPVP_engine} engine parent
  * @return {visionPVP_resource} self
@@ -999,7 +1072,8 @@ var visionPVP_resource              = function(engine) {
                 'pvp-night':        'Nighttime PVP',
                 'pvp':              'PVP Only',
                 'pve':              'PVE Only',
-                'random':           'Random PVP/PVE'
+                'random':           'Random PVP/PVE',
+                'time':             'Time-Based PVP'
             }
         }
 
@@ -1059,7 +1133,7 @@ var visionPVP = {
      */
     Title:          "visionPVP",
     Author:         "VisionMise",
-    Version:        V(0, 1, 5),
+    Version:        V(0, 2, 1),
     ResourceId:     1135,
     HasConfig:      true,
 
@@ -1070,7 +1144,7 @@ var visionPVP = {
     engine:         "",
     ready:          false,
     prefix:         "visionPVP",
-    modes:          ['pvp', 'pve', 'pvp-night', 'pvp-day', 'random'],
+    modes:          ['pvp', 'pve', 'pvp-night', 'pvp-day', 'random', 'time'],
 
 
     /**
