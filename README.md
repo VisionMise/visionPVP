@@ -1,5 +1,5 @@
 # visionPVP
-###### version 0.1.5a 
+###### version 0.2.1a 
 
 VisionPVP allows PVP and PVE to be controlled by time of day, randomly, or by static modes and currently supports 5 options:
 PVP: PVP is enabled all of the time
