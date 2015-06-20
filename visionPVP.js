@@ -9,7 +9,7 @@
 
 
 var engineVersion   = '0.2.1';
-var configVersion   = '1.3.4';
+var configVersion   = '1.3.5';
 
 
 /**
@@ -956,19 +956,26 @@ var visionPVP_pvptime_handler       = function(dataObject, engine) {
         if (this.start > this.stop && curHour > this.stop) {
             var stop    = this.stop + 24;
             var start   = this.start;
-            var pvpon       = (curHour >= start && curHour < stop);
-            //var diff    = (stop - start);
-            //stop        = (start + diff);
+            var pvpon   = (curHour >= start && curHour < stop);
         } else {
             var stop    = this.stop;
             var start   = this.start;
-            var pvpon       = (curHour >= start || curHour < stop);
+            var pvpon   = (curHour >= start || curHour < stop);
         }
 
-        //var msg         = this.engine.resources.get('console', 'pvp_time');
-        //this.engine.console("Current: " + curHour + " Start: " + start + " Stop: " + stop + " On: " + pvpon);
-        
-        return (pvpon == false);
+        var pveMode     = (pvpon == false);
+
+        if (pve != pveMode) {
+            if (!pveMode) {
+                this.msg    = this.engine.resources.get('chat', 'pvp_start');
+            } else {
+                this.msg    = this.engine.resources.get('chat', 'pvp_stop');
+            }
+
+            this.engine.resources.get('console', 'pvp_time');
+        }
+
+        return pveMode;
     };
 
     return this.init(dataObject, engine);
@@ -1047,7 +1054,8 @@ var visionPVP_resource              = function(engine) {
                 'build_config':     'Updated Configuration',
                 'rnd_hour_set':     'Random Hour Chosen: %hour%',
                 'rnd_next_mode':    'The server will change to %mode% in %hours% hours',
-                'rnd_cur_hour':     'The current server hour is %hour%'
+                'rnd_cur_hour':     'The current server hour is %hour%',
+                'pvp_time':         'Server Time Triggered'
             },
 
             'error':                {
@@ -1064,7 +1072,9 @@ var visionPVP_resource              = function(engine) {
                 'pvp':              "Turning PVE Off. In PVP Mode",
                 'pve':              "Turning PVP Off. In PVE Mode",
                 'random':           "The server is in Random Mode. A random hour of the day will be chosen to change to %mode% mode.",
-                'rndWarning':       "The server will change to %mode% mode in %hours% hours."
+                'rndWarning':       "The server will change to %mode% mode in %hours% hours.",
+                'pvp_start':        "It is now PVP Time",
+                'pvp_stop':         "PVP Time is over"
             },
 
             'label':                {
