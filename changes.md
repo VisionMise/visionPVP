@@ -1,11 +1,18 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
-### Version 0.2.1a
+### Version 0.2.2a
 
 Enhancements
+- Added new mode 'time' which allows a start and stop time to be set for PVP or PVE mode
+- Added new mode 'event' which sets PVP or PVE mode when an airdrop event happens for a configured length of time
 
 Bugs / Code Changes
+- Added new eventController
+- Added visionPVP_event_handler
+- Updated resources
+- Updated config
+- Added new mode to engine, oxide object, and visionPVP_pvpmode
 
 ### Version 0.1.5a
 

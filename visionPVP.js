@@ -2,14 +2,14 @@
  * VisionPVP
  *
  * @author          VisionMise
- * @version         0.2.1
+ * @version         0.2.2
  * @description     Please README.md for More Information
  * @url             http://visionmise.github.io/visionPVP/
  */
 
 
-var engineVersion   = '0.2.1';
-var configVersion   = '1.3.6';
+var engineVersion   = '0.2.2';
+var configVersion   = '1.3.8';
 
 
 /**
@@ -478,13 +478,8 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
         var currentMode         = server.pve;
         var changed             = (oldMode != currentMode);
 
-        if (currentMode == 1) {
-            this.rust.BroadcastChat(this.prefix, reason);
-        } else {
-            this.rust.BroadcastChat(this.prefix, reason);
-        }
-
         if (changed) {
+            this.broadcast(reason);
             this.console(
                 this.resources.get('console', 'mode_set')   + 
                 ' '                                         + 
@@ -542,7 +537,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      * @return {visionPVP_engine} self
      */
     this.console        = function(text) {
-        print("-- " + this.prefix + ": " + text);
+        print(this.prefix + ": " + text);
         return this;
     };
 
@@ -567,6 +562,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      */
     this.broadcast      = function(text) {
         this.rust.BroadcastChat(this.prefix, text);
+        print("[Broadcast: VisionPVP] " + text);
         return this;
     };
 
@@ -593,6 +589,7 @@ var visionPVP_eventController       = function(engine) {
         var hooks   = object.hooks;
         for (var eventName in hooks) {
             var callback    = hooks[eventName];
+            if (!this.hooks[eventName]) this.hooks[eventName] = {};
             this.hooks[eventName][this.hooks.length]    = callback;
         }
     };
@@ -605,7 +602,7 @@ var visionPVP_eventController       = function(engine) {
 
         for (var index in callbackList) {
             var callback            = callbackList[index];
-            results[results.length] = callback(data);
+            results[results.length] = callback(data, this.engine);
         }
 
         return results;
@@ -1050,31 +1047,59 @@ var visionPVP_event_handler         = function(dataObject, engine) {
     this.engine         = {};
     this.data           = {};
     this.type           = 'visionPVP_event_handler';
-    this.hooks          = {
-        'OnAirdrop':        this.invoke;
-    };
-    
-    this.mode           = 1;
+    this.hooks          = {};
+        
+    this.pveMode        = 1;
     this.length         = 0;
+    this.msg            = '';
+    this.lastChange     = -1;
+    this.switched       = false;
 
     this.init           = function(dataObject, engine) {
         this.engine     = engine;
         this.data       = dataObject;
-        this.mode       = (this.engine.config.Settings['event']['pvp_event_mode'] == 'pve');
+        this.pveMode    = !(this.engine.config.Settings['event']['pvp_event_mode'] != 'pvp');
         this.length     = parseInt(this.engine.config.Settings['event']['pvp_duration']);
 
-        this.engine.eventController.register(this);
+        this.hooks          = {
+            'onairdrop':        this.invoke
+        };
+
+        this.engine.eventController.registerHooks(this);
     };
 
     this.mode           = function() {
-        var msg         = this.engine.resources.get('chat', 'event');
-        var mode        = (this.mode == 1) ? 'PVE' : 'PVP';
+        var curHour     = this.engine.time.hour();
 
-        this.msg        = msg.replace('%mode%', mode).replace("%hours%", this.duration);
-        return this.mode;
+        this.lastChange = parseInt(this.data.get("last_event"));
+        var stop        = (this.lastChange + parseInt(this.length));
+
+        this.switched   = (curHour <= stop);
+
+        if (this.switched) {
+            var msg         = this.engine.resources.get('chat', 'event_start');
+            var mode        = (this.pveMode != 1) ? 'PVE' : 'PVP';
+            this.msg        = msg.replace('%mode%', mode).replace("%hours%", this.length);
+
+        } else {
+            var msg         = this.engine.resources.get('chat', 'event_stop');
+            var mode        = (this.pveMode == 1) ? 'PVE' : 'PVP';
+            this.msg        = msg.replace('%mode%', mode).replace("%hours%", this.length);
+        }
+
+        return (this.switched) ? !this.pveMode : this.pveMode;
     };
 
-    this.invoke         = function() {};
+    this.invoke         = function(data, engine) {
+        var msg                 = engine.resources.get('console', 'event');
+        var lastChange          = engine.time.hour();
+        var mode                = (this.pveMode == 1) ? 'PVE' : 'PVP';
+         
+        engine.store.set('last_event', lastChange);
+        engine.console(msg.replace('%mode%', mode));
+
+        return this;
+    };
 
     return this.init(dataObject, engine);
 };
@@ -1154,7 +1179,8 @@ var visionPVP_resource              = function(engine) {
                 'rnd_hour_set':     'Random Hour Chosen: %hour%',
                 'rnd_next_mode':    'The server will change to %mode% in %hours% hours',
                 'rnd_cur_hour':     'The current server hour is %hour%',
-                'pvp_time':         'Server Time Triggered'
+                'pvp_time':         'Server Time Triggered',
+                'event':            'Event triggered mode change to %mode%'
             },
 
             'error':                {
@@ -1174,7 +1200,8 @@ var visionPVP_resource              = function(engine) {
                 'rndWarning':       "The server will change to %mode% mode in %hours% hours.",
                 'pvp_start':        "It is now PVP Time",
                 'pvp_stop':         "PVP Time is over",
-                'event':            "Server now in %mode% mode for %hours% hours because of an air-drop"
+                'event_start':      "Server now in %mode% mode for %hours% hours because of an air-drop",
+                'event_stop':       "Server now in %mode% because the air-drop is over"
             },
 
             'label':                {
@@ -1243,7 +1270,7 @@ var visionPVP = {
      */
     Title:          "visionPVP",
     Author:         "VisionMise",
-    Version:        V(0, 2, 1),
+    Version:        V(0, 2, 2),
     ResourceId:     1135,
     HasConfig:      true,
 
@@ -1418,6 +1445,6 @@ var visionPVP = {
     /** Oxide Hooks */
 
         OnAirdrop:              function() {
-            //this.engine.eventController = new visionPVP_eventController('onairdrop', {});
+            this.engine.eventController.raiseEvent('onairdrop', {});
         }
 };

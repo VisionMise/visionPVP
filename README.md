@@ -1,12 +1,21 @@
 # visionPVP
+
 ###### version 0.2.1a 
 
-VisionPVP allows PVP and PVE to be controlled by time of day, randomly, or by static modes and currently supports 5 options:
-PVP: PVP is enabled all of the time
-PVE: PVP is disabled all of the time
-Night Mode: PVP is only enabled at night (Default Mode)
-Day Mode: PVP is only enabled during the day
-Random Mode: PVP and PVE are toggled randomly
+#### A PVP / PVE Controller for Rust
+
+visionPVP allows PVP and PVE to be controlled by time of day, or static modes. visionPVP currently supports 7 modes
+
+- PVP: PVP is enabled all of the time 
+- PVE: PVP is disabled all of the time
+- Night Mode: PVP is only enabled at night (Default Mode)
+- Day Mode: PVP is only enabled during the day
+- Random Mode: PVP and PVE are toggle randomly
+- Time Mode: Start and Stop PVP or PVE at certain times
+- Event Mode: Start PVP or PVE when an airdrop starts for a certain length of time
+
+---
+
 When PVE mode is enabled, Players cannot hurt other players by attacking them. Players can still be hurt by animals, traps, fire, and other environment damage such as falling or being too cold, with radiation, etc...
 
 PVE does not prevent players from being looted or prevent buildings from being damaged. If someone breaks in your home while PVE is enabled, you may have a hard time stopping them.
@@ -17,6 +26,7 @@ VisionPVP is still in alpha development. You may experience bugs as updates are 
 https://github.com/VisionMise/visionPVP/issues/new
 
 ---
+
 Available at 
 [visionmise.github.io/visionPVP](http://visionmise.github.io/visionPVP/)
 
@@ -24,20 +34,6 @@ A Plugin for OxideMode for Rust
 
 [oxidemod.org](http://oxidemod.org)
 
-
----
-
-### visionPVP
-
-#### A PVP / PVE Controller
-
-visionPVP allows PVP and PVE to be controlled by time of day, or static modes. visionPVP currently supports 5 modes
-
-- PVP: PVP is enabled all of the time 
-- PVE: PVP is disabled all of the time
-- Night Mode: PVP is only enabled at night (Default Mode)
-- Day Mode: PVP is only enabled during the day
-- Random Mode: PVP and PVE are toggle randomly
 
 ---
 
@@ -49,6 +45,10 @@ visionPVP allows PVP and PVE to be controlled by time of day, or static modes. v
       	"minumum": 1,
       	"maximum": 24,
       	"player_warning": 2
+      },
+      "event": 	{
+      	'pvp_duration':     "2",
+        'pvp_event_mode':   "pvp"
       }
     }
 
@@ -63,4 +63,6 @@ Valid values for config are as follows:
     pvp
     pve
     random
+    time
+    event
 
