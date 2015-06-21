@@ -9,7 +9,7 @@
 
 
 var engineVersion   = '0.2.1';
-var configVersion   = '1.3.5';
+var configVersion   = '1.3.6';
 
 
 /**
@@ -118,6 +118,9 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
     this.resources      = {};
 
 
+    this.eventController= {};
+
+
     /**
      * LoadConfig
      * @return {boolean} True if config was built
@@ -165,6 +168,10 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             "pvptime":      {
                 'pvp_start_time':   "18",
                 'pvp_stop_time':    "6"
+            },
+            "event":        {
+                'pvp_duration':     "2",
+                'pvp_event_mode':   "pvp"
             }
         };
 
@@ -226,6 +233,9 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
          * Print Startup
          */
         this.console(this.prefix + ' ' + this.resources.get('console', 'started'));
+
+
+        this.eventController    = new visionPVP_eventController(this);
 
 
         /**
@@ -382,6 +392,16 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             case 'time':
                 if (!this.handler || this.handler.type != 'visionPVP_pvptime_handler') {
                     this.handler    = new visionPVP_pvptime_handler(this.store, this);
+                }
+
+                var mode        = this.handler.mode();
+
+                this.serverPveSet(mode, this.handler.msg);
+            break;
+
+            case 'event':
+                if (!this.handler || this.handler.type != 'visionPVP_event_handler') {
+                    this.handler    = new visionPVP_event_handler(this.store, this);
                 }
 
                 var mode        = this.handler.mode();
@@ -555,6 +575,43 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      * Return this as an initialized object
      */
     return this.init(pluginObject, configObject, rust, data, prefix, version, interop);
+};
+
+
+var visionPVP_eventController       = function(engine) {
+
+    this.engine             = {};
+    this.hooks              = {};
+
+    this.init               = function(engine) {
+        this.engine         = engine;
+    };
+
+    this.registerHooks      = function(object) {
+        if (!object || !object.hooks) return false;
+
+        var hooks   = object.hooks;
+        for (var eventName in hooks) {
+            var callback    = hooks[eventName];
+            this.hooks[eventName][this.hooks.length]    = callback;
+        }
+    };
+
+    this.raiseEvent         = function(eventName, data) {
+        if (!this.hooks || !this.hooks[eventName]) return false;
+
+        var callbackList    = this.hooks[eventName];
+        var results         = {};
+
+        for (var index in callbackList) {
+            var callback            = callbackList[index];
+            results[results.length] = callback(data);
+        }
+
+        return results;
+    };
+
+    return this.init(engine);
 };
 
 
@@ -919,7 +976,7 @@ var visionPVP_random_handler        = function(dataObject, engine) {
 
 
 /**
- * [ description]
+ * Time-Based PVP Mode Handler
  * @param  {visionPVP_data}     dataObject 
  * @param  {visionPVP_engine}   engine 
  * @return {visionPVP_pvptime_handler} self
@@ -977,6 +1034,47 @@ var visionPVP_pvptime_handler       = function(dataObject, engine) {
 
         return pveMode;
     };
+
+    return this.init(dataObject, engine);
+};
+
+
+/**
+ * AirDrop Handler
+ * @param  {visionPVP_data}     dataObject
+ * @param  {visionPVP_engine}   engine
+ * @return {visionPVP_event_handler}
+ */
+var visionPVP_event_handler         = function(dataObject, engine) {
+
+    this.engine         = {};
+    this.data           = {};
+    this.type           = 'visionPVP_event_handler';
+    this.hooks          = {
+        'OnAirdrop':        this.invoke;
+    };
+    
+    this.mode           = 1;
+    this.length         = 0;
+
+    this.init           = function(dataObject, engine) {
+        this.engine     = engine;
+        this.data       = dataObject;
+        this.mode       = (this.engine.config.Settings['event']['pvp_event_mode'] == 'pve');
+        this.length     = parseInt(this.engine.config.Settings['event']['pvp_duration']);
+
+        this.engine.eventController.register(this);
+    };
+
+    this.mode           = function() {
+        var msg         = this.engine.resources.get('chat', 'event');
+        var mode        = (this.mode == 1) ? 'PVE' : 'PVP';
+
+        this.msg        = msg.replace('%mode%', mode).replace("%hours%", this.duration);
+        return this.mode;
+    };
+
+    this.invoke         = function() {};
 
     return this.init(dataObject, engine);
 };
@@ -1074,7 +1172,8 @@ var visionPVP_resource              = function(engine) {
                 'random':           "The server is in Random Mode. A random hour of the day will be chosen to change to %mode% mode.",
                 'rndWarning':       "The server will change to %mode% mode in %hours% hours.",
                 'pvp_start':        "It is now PVP Time",
-                'pvp_stop':         "PVP Time is over"
+                'pvp_stop':         "PVP Time is over",
+                'event':            "Server now in %mode% mode for %hours% hours because of an air-drop"
             },
 
             'label':                {
@@ -1154,7 +1253,7 @@ var visionPVP = {
     engine:         "",
     ready:          false,
     prefix:         "visionPVP",
-    modes:          ['pvp', 'pve', 'pvp-night', 'pvp-day', 'random', 'time'],
+    modes:          ['pvp', 'pve', 'pvp-night', 'pvp-day', 'random', 'time', 'event'],
 
 
     /**
@@ -1188,7 +1287,7 @@ var visionPVP = {
             var func    = consoleCommands[cmd];
 
             command.AddConsoleCommand(name, this.Plugin, func);
-            print("-- " + this.prefix + ": Added Console Command (" + name + ")");
+            //print("-- " + this.prefix + ": Added Console Command (" + name + ")");
         }
 
         for (var cmd in chatCommands) {
@@ -1196,7 +1295,7 @@ var visionPVP = {
             var func    = chatCommands[cmd];
 
             command.AddChatCommand(name, this.Plugin, func);
-            print("-- " + this.prefix + ": Added Chat Command (" + name + ")");
+            //print("-- " + this.prefix + ": Added Chat Command (" + name + ")");
         }
     },
 
@@ -1312,5 +1411,12 @@ var visionPVP = {
 
                 print("New Random Maximum Hours: " + max);
             }
+        },
+
+
+    /** Oxide Hooks */
+
+        OnAirdrop:              function() {
+            //this.engine.eventController = new visionPVP_eventController('onairdrop', {});
         }
 };
