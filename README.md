@@ -13,6 +13,7 @@ A Plugin for OxideMode for Rust
 ---
 
 ### visionPVP
+
 #### A PVP / PVE Controller
 
 visionPVP allows PVP and PVE to be controlled by time of day, or static modes. visionPVP currently supports 5 modes
