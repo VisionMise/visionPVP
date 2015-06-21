@@ -118,6 +118,10 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
     this.resources      = {};
 
 
+    /**
+     * Event Controller
+     * @type {visionPVP_eventController}
+     */
     this.eventController= {};
 
 
@@ -185,11 +189,11 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      * init
      *
      * Kuhl PVP API Initialization 
-     *@param  {Oxide.Plugin}    pluginObject
-     *@param  {Oxide.Config}    configObject
-     *@param  {Oxide.rust}      rust
-     *@param  {String}          prefix
-     *@return {this}
+     * @param  {Oxide.Plugin}    pluginObject
+     * @param  {Oxide.Config}    configObject
+     * @param  {Oxide.rust}      rust
+     * @param  {String}          prefix
+     * @return {this}
      */
     this.init           = function(pluginObject, configObject, rust, data, prefix, version, interop) {
 
@@ -206,6 +210,10 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
         this.config     = configObject;
 
 
+        /**
+         * Oxide Hook Object
+         * @type {Oxide.Object}
+         */
         this.interop    = interop;
         
 
@@ -235,6 +243,10 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
         this.console(this.prefix + ' ' + this.resources.get('console', 'started'));
 
 
+        /**
+         * Event Controller
+         * @type {visionPVP_eventController}
+         */
         this.eventController    = new visionPVP_eventController(this);
 
 
@@ -574,15 +586,43 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
 };
 
 
+/**
+ * Event Controller
+ * @param  {visionPVP_engine}           engine
+ * @return {visionPVP_eventController}  self
+ */
 var visionPVP_eventController       = function(engine) {
 
+    /**
+     * Engine
+     * @type {visionPVP_engine}
+     */
     this.engine             = {};
+
+
+    /**
+     * Hooks 
+     * @type {Object}
+     */
     this.hooks              = {};
 
+
+    /**
+     * Initialize
+     * @param  {visionPVP_engine}   engine
+     * @return {visionPVP_eventController} self
+     */
     this.init               = function(engine) {
         this.engine         = engine;
+        return this;
     };
 
+
+    /**
+     * Register Hooks
+     * @param  {Object} visionPVP object
+     * @return {visionPVP_eventController} self
+     */
     this.registerHooks      = function(object) {
         if (!object || !object.hooks) return false;
 
@@ -592,8 +632,17 @@ var visionPVP_eventController       = function(engine) {
             if (!this.hooks[eventName]) this.hooks[eventName] = {};
             this.hooks[eventName][this.hooks.length]    = callback;
         }
+
+        return this;
     };
 
+
+    /**
+     * Raise Event
+     * @param  {string}     eventName
+     * @param  {object}     data
+     * @return {array}      result list
+     */
     this.raiseEvent         = function(eventName, data) {
         if (!this.hooks || !this.hooks[eventName]) return false;
 
@@ -608,6 +657,10 @@ var visionPVP_eventController       = function(engine) {
         return results;
     };
 
+
+    /**
+     * return self
+     */
     return this.init(engine);
 };
 

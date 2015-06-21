@@ -1,6 +1,6 @@
 # visionPVP
 
-###### version 0.2.1a 
+###### version 0.2.2a 
 
 #### A PVP / PVE Controller for Rust
 
