@@ -1080,6 +1080,7 @@ var visionPVP_event_handler         = function(dataObject, engine) {
 };
 
 
+
 /**
  * visionPVP_resource Hanlder
  * @param  {visionPVP_engine} engine parent
