@@ -919,10 +919,10 @@ var visionPVP_random_handler        = function(dataObject, engine) {
 
 
 /**
- * [visionPVP_pvptime_handler description]
- * @param  {[type]} dataObject [description]
- * @param  {[type]} engine     [description]
- * @return {[type]}            [description]
+ * [ description]
+ * @param  {visionPVP_data}     dataObject 
+ * @param  {visionPVP_engine}   engine 
+ * @return {visionPVP_pvptime_handler} self
  */
 var visionPVP_pvptime_handler       = function(dataObject, engine) {
 
