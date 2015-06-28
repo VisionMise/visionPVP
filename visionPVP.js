@@ -2,14 +2,14 @@
  * VisionPVP
  *
  * @author          VisionMise
- * @version         0.2.2
+ * @version         0.2.4
  * @description     Please README.md for More Information
  * @url             http://visionmise.github.io/visionPVP/
  */
 
 
-var engineVersion   = '0.2.2';
-var configVersion   = '1.3.8';
+var engineVersion   = '0.2.4';
+var configVersion   = '1.4.1';
 
 
 /**
@@ -172,10 +172,6 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             "pvptime":      {
                 'pvp_start_time':   "18",
                 'pvp_stop_time':    "6"
-            },
-            "event":        {
-                'pvp_duration':     "2",
-                'pvp_event_mode':   "pvp"
             }
         };
 
@@ -411,6 +407,9 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
                 this.serverPveSet(mode, this.handler.msg);
             break;
 
+            /**
+             * @deprecated Missing OxideMod API Event
+             *//*
             case 'event':
                 if (!this.handler || this.handler.type != 'visionPVP_event_handler') {
                     this.handler    = new visionPVP_event_handler(this.store, this);
@@ -419,7 +418,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
                 var mode        = this.handler.mode();
 
                 this.serverPveSet(mode, this.handler.msg);
-            break;
+            break;*/
 
         }
 
@@ -726,7 +725,7 @@ var visionPVP_time_object           = function() {
      */
     this.init           = function() {
         var global              = importNamespace("");  
-        this.sky                = global.TOD_Sky.get_Instance();
+        this.sky                = global.TOD_Sky.Instance;
     };
 
 
@@ -875,11 +874,15 @@ var visionPVP_pvpmode_type          = function(typeName) {
                 this.name   = 'interval';
             break;
 
+
+            /**
+             * @deprecated Missing OxideMod API Event
+             *//*
             case 'event':
                 this.value  = 5;
                 this.label  = 'On an Event';
                 this.name   = 'event';
-            break;
+            break;*/
 
             case 'time':
                 this.value  = 6;
@@ -1091,10 +1094,11 @@ var visionPVP_pvptime_handler       = function(dataObject, engine) {
 
 /**
  * AirDrop Handler
+ * @deprecated  Missing Event from Oxide API
  * @param  {visionPVP_data}     dataObject
  * @param  {visionPVP_engine}   engine
  * @return {visionPVP_event_handler}
- */
+ *//*
 var visionPVP_event_handler         = function(dataObject, engine) {
 
     this.engine         = {};
@@ -1155,7 +1159,7 @@ var visionPVP_event_handler         = function(dataObject, engine) {
     };
 
     return this.init(dataObject, engine);
-};
+};*/
 
 
 
@@ -1323,7 +1327,7 @@ var visionPVP = {
      */
     Title:          "visionPVP",
     Author:         "VisionMise",
-    Version:        V(0, 2, 2),
+    Version:        V(0, 2, 4),
     ResourceId:     1135,
     HasConfig:      true,
 
@@ -1334,23 +1338,23 @@ var visionPVP = {
     engine:         "",
     ready:          false,
     prefix:         "visionPVP",
-    modes:          ['pvp', 'pve', 'pvp-night', 'pvp-day', 'random', 'time', 'event'],
+    modes:          ['pvp', 'pve', 'pvp-night', 'pvp-day', 'random', 'time'],
 
+  
 
     /**
      * Init Oxide Hook
      */
-    Init: function () {},
+    Init: function () {
+    },
 
-
+    
     /**
      * OnServerInitialized Oxide Hook
      */
-    OnServerInitialized:    function () {
-        var jsonData    = data;
-
-        this.engine     = new visionPVP_engine(this.Plugin, this.Config, rust, jsonData, this.prefix, engineVersion, this);
-        this.ready      = true;  
+    OnServerInitialized:    function () {      
+        
+    	 
         
         var consoleCommands = {
             'pvp':          'setPvpMode',
@@ -1366,9 +1370,7 @@ var visionPVP = {
         for (var cmd in consoleCommands) {
             var name    = this.prefix + "." + cmd;
             var func    = consoleCommands[cmd];
-
             command.AddConsoleCommand(name, this.Plugin, func);
-            //print("-- " + this.prefix + ": Added Console Command (" + name + ")");
         }
 
         for (var cmd in chatCommands) {
@@ -1376,8 +1378,10 @@ var visionPVP = {
             var func    = chatCommands[cmd];
 
             command.AddChatCommand(name, this.Plugin, func);
-            //print("-- " + this.prefix + ": Added Chat Command (" + name + ")");
         }
+
+        this.engine     = new visionPVP_engine(this.Plugin, this.Config, rust, data, this.prefix, engineVersion, this);
+        this.ready      = true; 
     },
 
 
@@ -1443,11 +1447,15 @@ var visionPVP = {
 
         randomize:              function() {
             var mode        = this.engine.pvpMode;
-            if (mode.value == -1) {
-                this.engine.handler.randomize();
-            } else {
+
+            if (mode.value !== -1) {
                 print("Not in Random Mode");
+                return false;
             }
+
+            print(this.engine.handler.type);
+
+            this.engine.handler.randomize();
         },
 
         rndMin:                 function(param) {
@@ -1497,7 +1505,11 @@ var visionPVP = {
 
     /** Oxide Hooks */
 
+
+    	/**
+    	 * @depreicated Missing OxideMod API Event
+    	 *//*
         OnAirdrop:              function() {
             this.engine.eventController.raiseEvent('onairdrop', {});
-        }
+        }*/
 };

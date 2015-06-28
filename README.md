@@ -1,6 +1,6 @@
 # visionPVP
 
-###### version 0.2.2a 
+###### version 0.2.4
 
 #### A PVP / PVE Controller for Rust
 
@@ -12,7 +12,6 @@ visionPVP allows PVP and PVE to be controlled by time of day, or static modes. v
 - Day Mode: PVP is only enabled during the day
 - Random Mode: PVP and PVE are toggle randomly
 - Time Mode: Start and Stop PVP or PVE at certain times
-- Event Mode: Start PVP or PVE when an airdrop starts for a certain length of time
 
 ---
 
@@ -22,7 +21,7 @@ PVE does not prevent players from being looted or prevent buildings from being d
 
 The only thing this mode is doing is toggling the "server.pve" variable on the rust server on or off with conditions. The purpose of this plugin is to give options to those conditions and to manage them.
 
-VisionPVP is still in alpha development. You may experience bugs as updates are added. For faster turnaround, please report problems here:
+VisionPVP is still in development. You may experience bugs as updates are added. For faster turnaround, please report problems here:
 https://github.com/VisionMise/visionPVP/issues/new
 
 ---
@@ -45,10 +44,6 @@ A Plugin for OxideMode for Rust
       	"minumum": 1,
       	"maximum": 24,
       	"player_warning": 2
-      },
-      "event": 	{
-      	'pvp_duration':     "2",
-        'pvp_event_mode':   "pvp"
       }
     }
 
@@ -64,5 +59,4 @@ Valid values for config are as follows:
     pve
     random
     time
-    event
 
