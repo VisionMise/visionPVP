@@ -1,6 +1,12 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
+### Version 0.2.4
+
+Bugs / Code Changes
+- Removed Event mode; handlers for this have been changed and due to constraints, cannot get airdrop event
+- Fixed several bugs from cahnges to lates versions of Rust and OxideMod
+
 ### Version 0.2.2a
 
 Enhancements
