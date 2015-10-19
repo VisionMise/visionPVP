@@ -9,7 +9,7 @@
 
 
 var engineVersion   = '0.3.1';
-var configVersion   = '1.5.4';
+var configVersion   = '1.5.5';
 
 
 /**
@@ -163,7 +163,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
         var config      = {
             "version":      engineVersion,
             "config":       configVersion,
-            "pvpMode":      "pvp-event",
+            "pvpMode":      "pvp-night",
             "random":       {
                 "minimum":          "1",
                 "maximum":          "12",
