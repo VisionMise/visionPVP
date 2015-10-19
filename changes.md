@@ -1,6 +1,10 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
+### Version 0.3.2
+
+Fixed configuration to have pvpmode default be a valid option.
+
 ### Version 0.3.1
 
 Re-added Events now that OxideMod supports the hook again. Events will only been when an air-drop happens. This may change in the future
