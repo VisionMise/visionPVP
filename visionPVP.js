@@ -2,14 +2,14 @@
  * VisionPVP
  *
  * @author          VisionMise
- * @version         0.2.4
+ * @version         0.3.1
  * @description     Please README.md for More Information
  * @url             http://visionmise.github.io/visionPVP/
  */
 
 
-var engineVersion   = '0.2.4';
-var configVersion   = '1.4.1';
+var engineVersion   = '0.3.1';
+var configVersion   = '1.5.4';
 
 
 /**
@@ -163,7 +163,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
         var config      = {
             "version":      engineVersion,
             "config":       configVersion,
-            "pvpMode":      "pvp-night",
+            "pvpMode":      "pvp-event",
             "random":       {
                 "minimum":          "1",
                 "maximum":          "12",
@@ -172,6 +172,10 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             "pvptime":      {
                 'pvp_start_time':   "18",
                 'pvp_stop_time':    "6"
+            },
+            "event": 		{
+            	"pvp_event_mode":	"pvp",
+            	"pvp_duration": 	"2"
             }
         };
 
@@ -409,7 +413,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
 
             /**
              * @deprecated Missing OxideMod API Event
-             *//*
+             */
             case 'event':
                 if (!this.handler || this.handler.type != 'visionPVP_event_handler') {
                     this.handler    = new visionPVP_event_handler(this.store, this);
@@ -418,7 +422,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
                 var mode        = this.handler.mode();
 
                 this.serverPveSet(mode, this.handler.msg);
-            break;*/
+            break;
 
         }
 
@@ -496,6 +500,14 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
                 ' '                                         + 
                 currentMode
             );
+
+            if (server.pve == 1) {
+            	var expl 			= this.resources.get('chat', 'pve_expl');
+            	this.broadcast(expl);            	
+            } else {
+            	var expl 			= this.resources.get('chat', 'pvp_expl');
+            	this.broadcast(expl);            	
+            }
         }
 
         return currentMode;
@@ -877,12 +889,12 @@ var visionPVP_pvpmode_type          = function(typeName) {
 
             /**
              * @deprecated Missing OxideMod API Event
-             *//*
+             */
             case 'event':
                 this.value  = 5;
                 this.label  = 'On an Event';
                 this.name   = 'event';
-            break;*/
+            break;
 
             case 'time':
                 this.value  = 6;
@@ -1098,7 +1110,7 @@ var visionPVP_pvptime_handler       = function(dataObject, engine) {
  * @param  {visionPVP_data}     dataObject
  * @param  {visionPVP_engine}   engine
  * @return {visionPVP_event_handler}
- *//*
+ */
 var visionPVP_event_handler         = function(dataObject, engine) {
 
     this.engine         = {};
@@ -1144,6 +1156,8 @@ var visionPVP_event_handler         = function(dataObject, engine) {
             this.msg        = msg.replace('%mode%', mode).replace("%hours%", this.length);
         }
 
+        //if (this.switched) this.engine.console(this.msg);
+
         return (this.switched) ? !this.pveMode : this.pveMode;
     };
 
@@ -1159,8 +1173,7 @@ var visionPVP_event_handler         = function(dataObject, engine) {
     };
 
     return this.init(dataObject, engine);
-};*/
-
+};
 
 
 /**
@@ -1228,9 +1241,9 @@ var visionPVP_resource              = function(engine) {
         var resources       = {
             'config':               configVersion,
             'console':              {
-                'started':          'started',
+                'started':          'started PVP/PVE Tracking',
                 'mode_set':         'PVE mode set to',
-                'PVE_label':        'PVE Mode',
+                'PVE_label':        'PVE mode',
                 'config_set':       'Server PVP Mode Changed to',
                 'build_config':     'Updated Configuration',
                 'rnd_hour_set':     'Random Hour Chosen: %hour%',
@@ -1241,24 +1254,26 @@ var visionPVP_resource              = function(engine) {
             },
 
             'error':                {
-                100:                'Could not get server namespace',
-                101:                'Could not get server pve variable',
-                102:                'Unable to get current Server Mode'
+                100:                'Could not get server namespace from Rust Server',
+                101:                'Could not get server pve variable Rust Server',
+                102:                'Unable to get current Server Mode from Rust Server'
             },
 
             'chat':                 {
-                'pvp-night_off':    "Shutting PVP Off. It's daytime",
-                'pvp-night_on':     "Turning PVP On. It's nighttime",
-                'pvp-day_on':       "Turning PVP On. It's daytime",
-                'pvp-day_off':      "Turning PVP Off. It's nighttime",
-                'pvp':              "Turning PVE Off. In PVP Mode",
-                'pve':              "Turning PVP Off. In PVE Mode",
-                'random':           "The server is in Random Mode. A random hour of the day will be chosen to change to %mode% mode.",
-                'rndWarning':       "The server will change to %mode% mode in %hours% hours.",
-                'pvp_start':        "It is now PVP Time",
-                'pvp_stop':         "PVP Time is over",
-                'event_start':      "Server now in %mode% mode for %hours% hours because of an air-drop",
-                'event_stop':       "Server now in %mode% because the air-drop is over"
+                'pvp-night_off':    "Player Vs Player is now restricted due to the Daytime Compliance Laws",
+                'pvp-night_on':     "Player Vs Player is now allowed per the Night-time Freedom Act",
+                'pvp-day_on':       "Player Vs Player is now allowed per the Day-time Freedom Act",
+                'pvp-day_off':      "Player Vs Player is now restricted due to the Night-time Compliance Laws",
+                'pvp':              "Player Vs Player is now allowed",
+                'pve':              "Player Vs Player is now restricted",
+                'random':           "Player Vs Player will be random. A random hour of the day will be chosen to change to %mode% mode",
+                'rndWarning':       "Warning: %mode% mode will be in %hours% hours.",
+                'pvp_start':        "In compliance with the population laws, Player Vs Player killing is now allowed",
+                'pvp_stop':         "Player Vs Player freedoms have just been revoked in compliance with the population laws",
+                'event_start':      "Warning: %mode% mode will be inacted for %hours% hours in compliance with the SOTF Aggreement",
+                'event_stop':       "%mode% is now over in compliance with the SOTF Agreement",
+                'pve_expl': 		"Player Vs Player is now restricted. This means that players attempting to damage other players or buildings will be hurt. You are not protected from fire, explosions, drounding, cold, etc..",
+                'pvp_expl': 		"Player Player Vs Player is now allowed. This means that players may raid, kill, damage buildings without consequence."
             },
 
             'label':                {
@@ -1267,7 +1282,8 @@ var visionPVP_resource              = function(engine) {
                 'pvp':              'PVP Only',
                 'pve':              'PVE Only',
                 'random':           'Random PVP/PVE',
-                'time':             'Time-Based PVP'
+                'time':             'Time-Based PVP',
+                'event': 			'Event-Based PVP'
             }
         }
 
@@ -1327,7 +1343,7 @@ var visionPVP = {
      */
     Title:          "visionPVP",
     Author:         "VisionMise",
-    Version:        V(0, 2, 4),
+    Version:        V(0, 3, 1),
     ResourceId:     1135,
     HasConfig:      true,
 
@@ -1338,21 +1354,21 @@ var visionPVP = {
     engine:         "",
     ready:          false,
     prefix:         "visionPVP",
-    modes:          ['pvp', 'pve', 'pvp-night', 'pvp-day', 'random', 'time'],
+    modes:          ['pvp', 'pve', 'pvp-night', 'pvp-day', 'random', 'time', 'event'],
 
   
 
     /**
      * Init Oxide Hook
      */
-    Init: function () {
+    OnServerInitialized: function () {
     },
 
     
     /**
      * OnServerInitialized Oxide Hook
      */
-    OnServerInitialized:    function () {      
+    Init:    function () {      
         
     	 
         
@@ -1370,7 +1386,7 @@ var visionPVP = {
         for (var cmd in consoleCommands) {
             var name    = this.prefix + "." + cmd;
             var func    = consoleCommands[cmd];
-            command.AddConsoleCommand(name, this.Plugin, func);
+             command.AddConsoleCommand(name, this.Plugin, func);
         }
 
         for (var cmd in chatCommands) {
@@ -1506,10 +1522,15 @@ var visionPVP = {
     /** Oxide Hooks */
 
 
+    	onEntityTakeDamage: function(entity, hitInfo) {
+
+    	},
+
+
     	/**
     	 * @depreicated Missing OxideMod API Event
-    	 *//*
+    	 */
         OnAirdrop:              function() {
             this.engine.eventController.raiseEvent('onairdrop', {});
-        }*/
+        }
 };
