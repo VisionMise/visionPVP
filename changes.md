@@ -1,6 +1,13 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
+### Version 0.3.1
+
+Re-added Events now that OxideMod supports the hook again. Events will only been when an air-drop happens. This may change in the future
+if OxideMod expands its support for a helicopter event. Currently there are two settings to configure: The mode that will be enabled when
+the event happens, and how many hours it will last. See the README for information
+
+
 ### Version 0.2.4
 
 Bugs / Code Changes

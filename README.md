@@ -1,6 +1,6 @@
 # visionPVP
 
-###### version 0.2.4
+###### version 0.3.1
 
 #### A PVP / PVE Controller for Rust
 
@@ -12,6 +12,7 @@ visionPVP allows PVP and PVE to be controlled by time of day, or static modes. v
 - Day Mode: PVP is only enabled during the day
 - Random Mode: PVP and PVE are toggle randomly
 - Time Mode: Start and Stop PVP or PVE at certain times
+- Event Mode: Starts PVP or PVE mode when and Air Drop Happens for a certain duration
 
 ---
 
@@ -38,12 +39,24 @@ A Plugin for OxideMode for Rust
 
 ##### Sample Config
 
-    "Settings": {
-      "pvpMode": "pvp-night",
-      "random": {
-      	"minumum": 1,
-      	"maximum": 24,
-      	"player_warning": 2
+    {
+      "settings": {
+        "version":      engineVersion,
+        "config":       configVersion,
+        "pvpMode":      "pvp-event",
+        "random":       {
+            "minimum":          "1",
+            "maximum":          "12",
+            "player_warning":   "2"
+        },
+        "pvptime":      {
+            'pvp_start_time':   "18",
+            'pvp_stop_time':    "6"
+        },
+        "event":    {
+          "pvp_event_mode": "pvp",
+          "pvp_duration":   "2"
+        }
       }
     }
 
@@ -59,4 +72,5 @@ Valid values for config are as follows:
     pve
     random
     time
+    event
 
