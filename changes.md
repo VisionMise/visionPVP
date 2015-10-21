@@ -1,9 +1,12 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
-### Version 0.3.2
+### Version 0.3.3
 
 Initialization Bug Fixed
+
+### Version 0.3.2
+
 Fixed configuration to have pvpmode default be a valid option
 
 ### Version 0.3.1

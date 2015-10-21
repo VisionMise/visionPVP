@@ -2,14 +2,14 @@
  * VisionPVP
  *
  * @author          VisionMise
- * @version         0.3.2
+ * @version         0.3.3
  * @description     Please README.md for More Information
  * @url             http://visionmise.github.io/visionPVP/
  */
 
 
-var engineVersion   = '0.3.2';
-var configVersion   = '1.5.5';
+var engineVersion   = '0.3.3';
+var configVersion   = '1.5.6';
 
 
 /**
@@ -1343,7 +1343,7 @@ var visionPVP = {
      */
     Title:          "visionPVP",
     Author:         "VisionMise",
-    Version:        V(0, 3, 2),
+    Version:        V(0, 3, 3),
     ResourceId:     1135,
     HasConfig:      true,
 
