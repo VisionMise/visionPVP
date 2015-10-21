@@ -2,14 +2,14 @@
  * VisionPVP
  *
  * @author          VisionMise
- * @version         0.3.1
+ * @version         0.3.2
  * @description     Please README.md for More Information
  * @url             http://visionmise.github.io/visionPVP/
  */
 
 
-var engineVersion   = '0.3.1';
-var configVersion   = '1.5.4';
+var engineVersion   = '0.3.2';
+var configVersion   = '1.5.5';
 
 
 /**
@@ -163,7 +163,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
         var config      = {
             "version":      engineVersion,
             "config":       configVersion,
-            "pvpMode":      "pvp-event",
+            "pvpMode":      "event",
             "random":       {
                 "minimum":          "1",
                 "maximum":          "12",
@@ -1343,7 +1343,7 @@ var visionPVP = {
      */
     Title:          "visionPVP",
     Author:         "VisionMise",
-    Version:        V(0, 3, 1),
+    Version:        V(0, 3, 2),
     ResourceId:     1135,
     HasConfig:      true,
 
@@ -1368,7 +1368,7 @@ var visionPVP = {
     /**
      * OnServerInitialized Oxide Hook
      */
-    Init:    function () {      
+    OnServerInitialized:    function () {      
         
     	 
         
