@@ -4,6 +4,7 @@
 ### Version 0.3.2
 
 Initialization Bug Fixed
+Fixed configuration to have pvpmode default be a valid option
 
 ### Version 0.3.1
 
