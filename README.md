@@ -1,6 +1,6 @@
 # visionPVP
 
-###### version 0.3.1
+###### version 0.3.2
 
 #### A PVP / PVE Controller for Rust
 
@@ -43,7 +43,7 @@ A Plugin for OxideMode for Rust
       "settings": {
         "version":      engineVersion,
         "config":       configVersion,
-        "pvpMode":      "pvp-event",
+        "pvpMode":      "event",
         "random":       {
             "minimum":          "1",
             "maximum":          "12",
