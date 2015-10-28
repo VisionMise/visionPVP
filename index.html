@@ -22,11 +22,11 @@
   <body>
     <div class="wrapper">
       <header>
-        <img src="img/visionpvp-logo.256.png">
+        <img src="img/visionPVP-2.png">
         <h1>
           visionPVP
             <small>
-              version 0.3.1
+              version 0.4.2
             </small>
         </h1>
         <p>A Rust Oxide Plugin</p>
@@ -44,79 +44,302 @@
         </ul>
       </header>
       <section>
-   
+ <article class="markdown-body" id="body"><h1 id="visionpvp">VisionPVP</h1>
 
-<h3>
-<a id="visionpvp-1" class="anchor" href="#visionpvp-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>visionPVP</h3>
+<h6 id="version042">version 0.4.2</h6>
 
-<h4>
-<a id="a-pvp--pve-controller" class="anchor" href="#a-pvp--pve-controller" aria-hidden="true"><span class="octicon octicon-link"></span></a>A PVP / PVE Controller</h4>
+<h3 id="apvppvecontrollerforrust">A PVP / PVE Controller for Rust</h3>
 
-<p>visionPVP allows PVP and PVE to be controlled by time of day, or static modes. visionPVP currently supports 4 modes</p>
+<h3 id="bigupdateplayerpunishmentremoved">Big Update: Player Punishment Removed!</h3>
+
+<p>VisionPVP removes punishment from PVE and allows PVP and PVE to be controlled by time of day, event, randomly and more. </p>
+
+<p>Currently VisionPVP features 7 different configurable modes and player broadcasts that can be edited by server admins.</p>
+
+<h3 id="important">Important</h3>
+
+<p>visionPVP no longer uses the Rust <code class="prettyprint">server.pve</code> variable to change PVP and PVE mode. Instead, VisionPVP
+forces the server in PVP mode and then overrides the PVE switch when needed. This makes PVE mode slightly
+less weak. Before this update, players were punished for attacking other players, buildings or even their own
+homes and bases. Leaving most of the Rust population alienated from PVE mode all together because even building 
+your own base could kill you if you needed to take down a wall. VisionPVP uses a softer approach and only 
+negates damage from the attacked player when in PVE mode without to damage to the attacker.</p>
+
+<p>Some other mods have tried thing similar ideas with bad side effects such as not being able to gather, or 
+a full-on god mode protecting players from all damage, or only protecting against Melee damage. 
+VisionPVP still allows all other types of damage (falling, starving, drowning, bear attacks, etc.) and only 
+protects players against other players.</p>
+
+<p>If you prefer the legacy mode you can change the configuration file</p>
+
+<h5 id="legacymode">Legacy Mode</h5>
+
+<p>Default Rust Server Behavior and VisionPVP before v0.4.x</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">"pveMode": "server"
+</code></pre>
+
+<h5 id="visionpvemode">VisionPVE Mode</h5>
+
+<p>A more accepted Behavior; based on feedback and forums</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">"pveMode": "vision"
+</code></pre>
+
+<hr>
+
+<h3 id="availablemodes">Available Modes</h3>
+
+<p>visionPVP currently supports 7 modes:</p>
 
 <ul>
-<li>PVP: PVP is enabled all of the time</li>
-<li>PVE: PVP is disabled all of the time</li>
-<li>Night Mode: PVP is only enabled at night (Default Mode)</li>
-<li>Day Mode: PVP is only enabled during the day</li>
-<li>Random: PVP and PVE are toggled randomly</li>
-<li>Event: Change to PVP or PVE mode for a certain number of hours when an airdrop happens</li>
+<li>pvp</li>
+<li>pve</li>
+<li>pvp-night</li>
+<li>pvp-day</li>
+<li>time</li>
+<li>random</li>
+<li>event</li>
 </ul>
 
 <hr>
 
-<h5>
-<a id="chat" class="anchor" href="#chat" aria-hidden="true"><span class="octicon octicon-link"></span></a>Chat Commands</h5>
-<pre>/pvp</pre>
-<p>
-Prints the current Server PVP Mode to chat. Available to all players
-</p>
+<h4 id="pvpmode">PVP Mode</h4>
+
+<p>Console Command:</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">visionPVP.pvp pvp
+</code></pre>
+
+<p>Players may hurt other players and buildings. This mode will be on all of the time.
+PVP mode works the same as Vanilla Rust with default settings. VisionPVP is not required to
+run your server this way, but was added simply for consistency and convenience.</p>
+
+<h4 id="pvemode">PVE Mode</h4>
+
+<p>Console Command:</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">visionPVP.pvp pve
+</code></pre>
+
+<p>Players may not hurt other players. This differs from Rust PVE mode whereas VisionPVP does not
+punish players for attempting to attack each other. Punishment for damaging structures is also 
+removed so raiding is still possible with VisionPVP even when in PVE mode.</p>
+
+<h4 id="nightmode">Night Mode</h4>
+
+<p>Console Command:</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">visionPVP.pvp pvp-night
+</code></pre>
+
+<p>PVE mode during the day and PVP mode at night. VisionPVP will toggle PVP to be on only at night.
+During the day PVE is enforced and Players cannot hurt each other during the daytime hours. Daytime
+and Nighttime hours are determined by the server's Sun and cannot be controlled by VisionPVP. For more
+control over the time of day, use Time-Mode.</p>
+
+<h4 id="daymode">Day Mode</h4>
+
+<p>Console Command:</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">visionPVP.pvp pvp-day
+</code></pre>
+
+<p>PVE mode during the night and PVP mode during the day. VisionPVP will toggle PVE to only be at night.
+During the day, PVP mode is enforced and Players may hurt and kill other players. Leaving night for peace.
+Daytime and Nighttime hours are determined by the server's Sun and cannot be controlled by VisionPVP. For 
+more control over the time of day, use Time-Mode.</p>
+
+<h4 id="randommode">Random Mode</h4>
+
+<p>Console Command:</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">visionPVP.pvp random
+</code></pre>
+
+<p>Random mode toggles PVP and PVE mode on randomly. This is controlled by two settings in the configuration
+that determine the parameters for when and for how long. Optionally a player warning can be used before
+the random change occurs giving players a heads up to prepare for the change. More about the settings
+for random mode can be found below in the configuration section.</p>
+
+<h4 id="timemode">Time Mode</h4>
+
+<p>Console Command:</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">visionPVP.pvp time
+</code></pre>
+
+<p>Time mode lets you set a start and stop time for PVP mode. The rest of the time the server remains in
+PVE mode. This gives you more control then the day/night cycles which are set by the server. The times
+are relative to in-game server time and in 24 hour format (1 to 24).</p>
+
+<h4 id="eventmode">Event Mode</h4>
+
+<p>Console Command:</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">visionPVP.pvp event
+</code></pre>
+
+<p>Event mode allows you to set a default state of PVE or PVP and then when an event happens (currently only airdrops),
+VisionPVP will switch to the opposite mode for a certain duration which can be set in the configuration file.
+The switch will happen for a certain duration, also set in the configuration file. More on these settings in the
+configuration section below.</p>
+
+<p>Event mode is also the default mode. Keeping the server in PVE mode until an event happens, then switching to
+PVP mode for 2 (in-game) hours.</p>
+
 <hr>
 
-<h5>
-<a id="console" class="anchor" href="#console" aria-hidden="true"><span class="octicon octicon-link"></span></a>Console Commands</h5>
-<pre>visionPVP.pvp &lt;setting&gt;</pre>
-<p>
-	Updates the pvp configuration from the console or RCON
-	<br>
-	Example:
-	<pre>visionPVP.pvp pvp-night</pre>
-</p>
-<pre>visionPVP.rnd</pre>
-<p>
-  Generates a random number of hours between the min and the max and 
-  sets the next pvp/pve toggle time to (the current time) + (the generated number of hours)
-  <br>
-  Example:
-  <pre>visionPVP.rnd</pre>
-</p>
-<pre>visionPVP.rndmin &lt;setting&gt;</pre>
-<p>
-  Updates the random minimum from the console or RCON. The range is 0 to 24.
-  <br>
-  Example:
-  <pre>visionPVP.rndmin 4</pre>
-</p>
-<pre>visionPVP.rndmax &lt;setting&gt;</pre>
-<p>
-  Updates the random maximum from the console or RCON. The range is 0 to 24.
-  <br>
-  Example:
-  <pre>visionPVP.rndmax 21</pre>
-</p>
+<h3 id="warning">WARNING</h3>
+
+<p>PVE does not prevent players from being looted or prevent buildings from being damaged. </p>
+
+<p>VisionPVP is still in development. You may experience bugs as updates are added. For faster turnaround, please report problems here:
+<a href="https://github.com/VisionMise/visionPVP/issues/new">https://github.com/VisionMise/visionPVP/issues/new</a></p>
+
 <hr>
 
+<p>Available at 
+<a href="http://visionmise.github.io/visionPVP/">visionmise.github.io/visionPVP</a></p>
 
-<h5>
-<a id="modes" class="anchor" href="#modes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Modes</h5>
+<p>A Plugin for OxideMode for Rust</p>
 
-<div>Valid values for config or for console command are as follows:</div>
+<p><a href="http://oxidemod.org">oxidemod.org</a></p>
 
-<pre>pvp-day
-pvp-night
-pvp
+<hr>
+
+<h3 id="configuration">Configuration</h3>
+
+<p>For advanced reading:</p>
+
+<p>Configurations now support upgrades and no longer wipe your current settings when VisionPVP or it's config
+are file is updated. Below is a sample configuration file. The settings are explained below the example.</p>
+
+<h5 id="sampleconfig">Sample Config</h5>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">{
+  "settings": {
+    "version":      0.4.2,
+    "config":       1.6.5,
+    "pvpMode":      "event",
+    "pveMode":      "vision",
+    "random":       {
+        "minimum":          "1",
+        "maximum":          "12",
+        "player_warning":   "2"
+    },
+    "pvptime":      {
+        'pvp_start_time':   "18",
+        'pvp_stop_time':    "6"
+    },
+    "event":    {
+      "pvp_event_mode": "pvp",
+      "pvp_duration":   "2"
+    }
+  }
+}
+</code></pre>
+
+<h4 id="configurationsettings">Configuration Settings</h4>
+
+<h5 id="pvpmodepvppvepvpnightpvpdaytimerandomevent">pvpMode [pvp||pve||pvp-night||pvp-day||time||random||event]</h5>
+
+<p>The current setting for VisionPVP. This value can be any of the valid 7 modes.</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">pvp
 pve
-random</pre>
+pvp-night
+pvp-day
+time
+random
+event
+</code></pre>
+
+<h5 id="pvemodevisionserver">pveMode [vision||server]</h5>
+
+<p>The PVE behavior. When set to <code class="prettyprint">vision</code> the server will not punish players for engaging in player attacks or raiding.
+When set to <code class="prettyprint">server</code> VisionPVP will act according to the rule of the Rust Dedicated Server. </p>
+
+<h5 id="randomminimum124maximum124player_warning024">random [minimum(1-24), maximum (1-24), player_warning(0-24)]</h5>
+
+<p>When using a random time, you can specify a window of time in which a random hour may be picked to switch to PVP. The
+settings <code class="prettyprint">minimum</code> and <code class="prettyprint">maximum</code> define that window. If the current (in-game) time is noon, and the min and max are set
+to 1 and 12 respectively. Then a random hour to change to PVP will be chosen between 1 and 12 hours from now. That will
+continue in that fashion until you reset the random generator. The only values supported for each setting are 1 to 24.</p>
+
+<p>To reset the random generator, use the below console command:</p>
+
+<p>Console Command:</p>
+
+<pre class="prettyprint linenums" tabindex="0"><code data-inner="1">VisionPVP.rnd
+</code></pre>
+
+<p>A player warning can also be set to notify players that the change will occur. Set <code class="prettyprint">player_warning</code> to anything from 0 to
+24. It stores the number of hours before the change that the players are warned. The only values support are 0 to 24.</p>
+
+<ul>
+<li>0 Gives no Warning</li>
+<li>2 Gives a 2 hour warning</li>
+<li>24 Gives a day's notice</li>
+</ul>
+
+<h5 id="pvptimepvp_start_time124pvp_stop_time124">pvptime [pvp<em>start</em>time(1-24), pvp<em>stop</em>time(1-24)]</h5>
+
+<p>The time mode requires that a start and stop time be set for changing in to PVP mode. PVE mode will be enacted during the rest
+of the time. Setting <code class="prettyprint">pvp_start_time</code> to 18 will start PVP at 6pm (in-game time). Setting <code class="prettyprint">pvp_stop_time</code> to 6 will end PVP
+at 6am (in-game time). Values supported are 1 to 24.</p>
+
+<h5 id="eventpvp_event_modepvppvepvp_duration124">event [pvp<em>event</em>mode(pvp||pve), pvp_duration(1-24)]</h5>
+
+<p>The event mode is the setting that should be enacted when an event happens. The inverse will be enforced when an event is
+not happening and/or the duration limit is reached. The duration is set in  (in-game) hours and starts counting from the
+start of an event, not the end.</p>
+
+<hr>
+
+<h3 id="resources">Resources</h3>
+
+<p>Resources are strings used in messages sent to players. So when VisionPVP changes to PVP mode, it broadcasts that to chat.
+These messages are stored in the resources of your config. Resources are generated when the VisionPVP is added or upgrade on 
+your server. Currently resources are not upgradeable so the latest changes will wipe your current resources. It is recommended
+that if you make changes here, you make a backup before starting you server. If you needed to replace or changes these to get them
+in you own language or just for the sake of customization, make sure you understand how to edit JSON config files. If you need
+help in this area, learn JSON before attempting changes to resources.</p>
+
+<hr>
+
+<h3 id="furturedevelopment">Furture Development</h3>
+
+<p>The future development is almost <code class="prettyprint">(at an end) ? "sad panda" : "happy face";</code></p>
+
+<p>Version 0.4.2 is the first Release Canidant. It meets all of my original goals and addresses all
+of the abiltiy I have (so far) in making a PVP controller. It may still contain bugs and needs more
+testing by you folks. Your feedback is how I get a bug-free release 1.0</p>
+
+<p>Some of the remaining features include:</p>
+
+<ul>
+<li>Upgradable Resources, so their not wiped upon an update to the Mod or Config</li>
+<li>Bringing back optional Player Chat command to see what the current mode is (configurable by admins)</li>
+<li>Possible API for other modders. Not sure if there is interest here, or even what is required, but and API would allow other 
+mods to take control of VisionPVP for whatever reason.</li>
+<li>Better code documentation and comments</li>
+</ul>
+
+<p>Of course, as OxideMod2 and Rust change through their development, other changes may be needed to VisionPVP. But I hope to have 
+full release (v1.0.0) to you guys before 2016.</p>
+
+<p>Also working a new mod, more for modders then server admins called protorust. Its just for us JavaScript Modders. Though few of us,
+in the OxideMod/Rust community, I hope to bring a set of tools to make it easier to build mods in JavaScript. And if not, I'll use it
+to make another mod :p</p>
+
+<hr>
+
+<p>Thanks to my supporters, other modders for their examples. The folks on the forum, and a huge THANK YOU to Wulf.</p>
+
+<ul>
+<li>VisionMise</li>
+</ul></article>
 </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/VisionMise">VisionMise</a></p>
