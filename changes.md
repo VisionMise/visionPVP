@@ -1,6 +1,39 @@
 # visionPVP Changelog
 ##### Available At: http://visionmise.github.io/visionPVP/
 
+### Version 0.4.2
+
+#### New feature - VisionPVE (vs ServerPVE)
+
+This is the main feature that most people have asked for and was also my ultimate goal. It removes punishment
+from PVE. So no more taking damage for hitting a player building, or for hitting another player. VisionPVE
+simply protects the attacked player from damage.
+
+###### Details
+
+Players cannot do harm to other players when PVE is on. This will force `server.pve` to `false` in all cases.
+Now the option is stored in the data files and works independant of the server setting. 
+
+Players are still vulnerable to explosions, helicopters, animals, falling damage, and state-based damage such
+as hunger, drowning, or getting too cold.
+
+A new config option has been added and it won't wipe you config! More on that below. Here is the new config option
+that was added:
+
+	"pveMode": 		"vision"
+
+#### New Feature - ConfigUpgrade
+
+The addition of the VisionPVE feature comes a new config option which in the past meant the config would get wiped.
+For those with the upgrade mod, this was an issue because your server would change modes when it got updates and
+you may not know it. And your players may not know it.
+
+The new option will be added automatically without changing your current setup.
+
+#### Bug fixes
+
+Many bug fixes have been applied. Player chat commands have been removed. All console commands are the same.
+
 ### Version 0.3.3
 
 Initialization Bug Fixed
