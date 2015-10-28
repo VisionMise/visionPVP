@@ -2,14 +2,14 @@
  * VisionPVP
  *
  * @author          VisionMise
- * @version         0.3.3
+ * @version         0.4.2
  * @description     Please README.md for More Information
  * @url             http://visionmise.github.io/visionPVP/
  */
 
 
-var engineVersion   = '0.3.3';
-var configVersion   = '1.5.6';
+var engineVersion   = '0.4.2';
+var configVersion   = '1.6.7';
 
 
 /**
@@ -25,7 +25,7 @@ var configVersion   = '1.5.6';
  * 
  * @return {visionPVP_engine}
  */
-var visionPVP_engine                = function(pluginObject, configObject, rust, data, prefix, version, interop) {
+var visionPVP_engine                = function(pluginObject, configObject, rust, dataObject, prefix, version, interop) {
 
     /**
      * Prefix
@@ -132,22 +132,33 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
     this.loadConfig     = function() {
         this.config.Settings    = this.config.Settings || false;
 
+        //Build
         if (!this.config.Settings) {
             this.config.Settings = this.buildConfig();
             this.interop.SaveConfig();
+            this.console("Created new Config version " + configVersion);
             return true;
         }
 
-        if (!this.config.Settings['config']) {
-            this.config.Settings = this.buildConfig();
-            this.interop.SaveConfig();
-            return true;   
-        }
-
+        //Upgrade
         if (this.config.Settings['config'] != configVersion) {
-            this.config.Settings = this.buildConfig();
+            var tmpConfig   = this.buildConfig();
+
+            for (var key in tmpConfig) {
+                var curVal     = this.config.Settings[key];
+                var newVal      = tmpConfig[key];
+
+                if (!curVal) {
+                    this.config.Settings[key]   = newVal;
+                } else if (key == 'config' || key == 'engine') {
+                    this.config.Settings[key]   = newVal;
+                }
+
+            }
+            
             this.interop.SaveConfig();
-            return true;      
+            this.console("Updated Config to version " + configVersion);
+            return true;
         }
 
         return false;
@@ -164,6 +175,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             "version":      engineVersion,
             "config":       configVersion,
             "pvpMode":      "event",
+            "pveMode":      "vision",
             "random":       {
                 "minimum":          "1",
                 "maximum":          "12",
@@ -178,9 +190,6 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             	"pvp_duration": 	"2"
             }
         };
-
-        this.console("Updated Config");
-
         return config;
     };
 
@@ -195,7 +204,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      * @param  {String}          prefix
      * @return {this}
      */
-    this.init           = function(pluginObject, configObject, rust, data, prefix, version, interop) {
+    this.init           = function(pluginObject, configObject, rust, dataObject, prefix, version, interop) {
 
         /**
          * Name
@@ -228,6 +237,20 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
          * Load Configuration
          */
         this.loadConfig();
+
+
+        /**
+         * Oxide Rust Object
+         * @type {Oxide.Rust}
+         */
+        this.rust       = rust;
+
+
+        /**
+         * Oxide Data Object
+         * @type {Oxide.DataFile}
+         */
+        this.data       = dataObject;        
         
 
         /**
@@ -251,20 +274,6 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
 
 
         /**
-         * Oxide Rust Object
-         * @type {Oxide.Rust}
-         */
-        this.rust       = rust;
-
-
-        /**
-         * Oxide Data Object
-         * @type {Oxide.DataFile}
-         */
-        this.data       = data;
-
-
-        /**
          * Permanent Storage
          * @type {visionPVP_data}
          */
@@ -278,11 +287,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
         this.version    = version;
         
 
-        /**
-         * Time API
-         * @type {visionPVP_time_object}
-         */
-        this.time       = new visionPVP_time_object();
+        this.startTime();
 
 
         /**
@@ -298,13 +303,6 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             this.pvpMode.label
         );
 
-
-        /**
-         * Set Ready
-         */
-        this.ready      = true;
-
-
         /**
          * Check PVE Settings
          */
@@ -315,6 +313,8 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             mode
         );
 
+
+
         
         /**
          * Return this object
@@ -323,12 +323,27 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
     };
 
 
+    this.startTime       = function() {
+        /**
+         * Time API
+         * @type {visionPVP_time_object}
+         */
+        this.time       = new visionPVP_time_object();
+
+         /**
+         * Set Ready
+         */
+        this.ready      = true;
+        interop.ready   = true;
+    };
+
+
     /**
      * Tick Event
      * @return {Void}
      */
     this.timerTick      = function() {
-        if (this.ready == false) return false;
+        if (this.ready == false || this.interop.ready == false) return false;
         this.checkPVPMode();
     };
 
@@ -376,7 +391,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             break;
 
             case 'pvp':
-                if (pve) {
+                if (pve == 1) {
                     msg         = this.resources.get('chat', 'pvp');
                     this.serverPveSet(0, msg);
                     this.console(msg);
@@ -384,7 +399,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             break;
 
             case 'pve':
-                if (!pve) {
+                if (pve == 0) {
                     msg         = this.resources.get('chat', 'pve');
                     this.serverPveSet(1, msg);
                     this.console(msg);
@@ -407,13 +422,12 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
                 }
 
                 var mode        = this.handler.mode();
+                if (!mode) mode = 0;
+                mode        = parseInt(mode);
 
                 this.serverPveSet(mode, this.handler.msg);
             break;
 
-            /**
-             * @deprecated Missing OxideMod API Event
-             */
             case 'event':
                 if (!this.handler || this.handler.type != 'visionPVP_event_handler') {
                     this.handler    = new visionPVP_event_handler(this.store, this);
@@ -421,6 +435,8 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
 
                 var mode        = this.handler.mode();
 
+                if (!mode) mode = 0;
+                mode        = parseInt(mode);
                 this.serverPveSet(mode, this.handler.msg);
             break;
 
@@ -435,6 +451,18 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      * @return {Boolean}
      */
     this.serverPveMode      = function() {
+        var vpve                = this.config.Settings['pveMode'];
+        var mode                = (vpve == 'vision') ? this._getVisionPVEMode() : this._getServerPVEMode();
+
+        return mode;
+    };
+
+
+    /**
+     * Get the PVE mode from the Rust Server Variable
+     * @return {Integer}
+     */
+    this._getServerPVEMode  = function() {
         var global              = importNamespace("ConVar");
         var server              = global.Server;
 
@@ -450,26 +478,11 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             return -1;
         }
 
+        
         return server.pve;
     };
 
-
-    /**
-     * Server PVP Mode
-     * @return {visionPVP_pvpmode_type}
-     */
-    this.serverPvpMode      = function() {
-        return this.pvpMode;
-    };
-
-
-    /**
-     * Set Server PVE Mode
-     * @param  {Integer} newMode PVE Mode
-     * @return {Boolean} Global.Server.pve
-     */
-    this.serverPveSet       = function(newMode, reason) {
-
+    this._setServerPVEMode  = function(newMode, reason, skipBroadcast) {
         var global              = importNamespace("ConVar");
         var server              = global.Server;
         var oldMode             = this.serverPveMode();
@@ -493,6 +506,7 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
         var currentMode         = server.pve;
         var changed             = (oldMode != currentMode);
 
+        if (skipBroadcast == true) return currentMode;
         if (changed) {
             this.broadcast(reason);
             this.console(
@@ -502,15 +516,90 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
             );
 
             if (server.pve == 1) {
-            	var expl 			= this.resources.get('chat', 'pve_expl');
-            	this.broadcast(expl);            	
+                var expl            = this.resources.get('chat', 'pve_expl');
+                this.broadcast(expl);               
             } else {
-            	var expl 			= this.resources.get('chat', 'pvp_expl');
-            	this.broadcast(expl);            	
+                var expl            = this.resources.get('chat', 'pvp_expl');
+                this.broadcast(expl);               
             }
         }
 
         return currentMode;
+    };
+
+    this._setVisionPVEMode  = function(newMode, reason) {
+        var oldMode         = parseInt(this.store.get("pveMode"));
+        var newMode         = parseInt(newMode);
+
+        if (oldMode == newMode) return oldMode;
+
+        var curMode         = this.store.set("pveMode", newMode);
+        var changed         = (curMode != oldMode);
+        
+        if (changed) {
+            this.broadcast(reason);
+            this.console(
+                this.resources.get('console', 'mode_set')   + 
+                ' '                                         + 
+                curMode
+            );
+
+            if (curMode == 1) {
+                var expl            = this.resources.get('chat', 'pve_expl');
+                this.broadcast(expl);               
+            } else {
+                var expl            = this.resources.get('chat', 'pvp_expl');
+                this.broadcast(expl);               
+            }
+
+            this._setServerPVEMode(0, "", true);
+        }
+
+        return curMode;
+    };
+
+
+    /**
+     * Get the PVE mode from the OxideMod Data object
+     * @return {[type]} [description]
+     */
+    this._getVisionPVEMode  = function() {
+        vpve_mode           = this.store.get('pveMode');
+
+        if (vpve_mode != 0 && vpve_mode != 1) {
+            vpve_mode       = 1;
+            this.store.set('pveMode', 1);
+        }
+
+        return vpve_mode;
+    };
+
+
+    /**
+     * Server PVP Mode
+     * @return {visionPVP_pvpmode_type}
+     */
+    this.serverPvpMode      = function() {
+        return this.pvpMode;
+    };
+
+
+    /**
+     * Set Server PVE Mode
+     * @param  {Integer} newMode PVE Mode
+     * @return {Boolean} Global.Server.pve
+     */
+    this.serverPveSet       = function(newMode, reason) {
+
+        var vpve                = this.config.Settings['pveMode'];
+
+        if (vpve == 'vision') {
+            var mode        = this._setVisionPVEMode(newMode, reason);
+        } else {
+            var mode        = this._setServerPVEMode(newMode, reason);
+        }
+
+        return mode;
     };
 
 
@@ -584,16 +673,19 @@ var visionPVP_engine                = function(pluginObject, configObject, rust,
      * @return {visionPVP_engine} self
      */
     this.broadcast      = function(text) {
-        this.rust.BroadcastChat(this.prefix, text);
-        print("[Broadcast: VisionPVP] " + text);
-        return this;
+        if (this.rust['BroadcastChat']) {
+            this.rust.BroadcastChat(this.prefix, text);
+            //print("[Broadcast: VisionPVP] " + text);
+        }
+
+        return this;    
     };
 
 
     /**
      * Return this as an initialized object
      */
-    return this.init(pluginObject, configObject, rust, data, prefix, version, interop);
+    return this.init(pluginObject, configObject, rust, dataObject, prefix, version, interop);
 };
 
 
@@ -691,7 +783,7 @@ var visionPVP_data                  = function(engine) {
         this.engine         = engine;
         this.prefix         = this.engine.prefix;
         this.table          = this.engine.data.GetData(this.prefix) || {};
-
+        
         return this;
     };
 
@@ -701,13 +793,14 @@ var visionPVP_data                  = function(engine) {
     };
 
     this.set                = function(key, value) {
-        if (!key || !value) return false;
-        this.table[key]     = value;
+        var oldValue        = this.table[key];
 
-        var ret = this.get(key);
-        if (ret == value) this.save();
-
-        return ret;
+        if ((oldValue != value)) {
+            this.table[key]      = value;
+            this.save();
+        }
+        
+        return this.table[key];
     };
 
     this.save               = function() {
@@ -736,8 +829,11 @@ var visionPVP_time_object           = function() {
      * @return {Void}
      */
     this.init           = function() {
-        var global              = importNamespace("");  
-        this.sky                = global.TOD_Sky.Instance;
+        var global              = importNamespace(""); 
+
+        if (global['TOD_Sky']['Instance']) {
+            this.sky                = global.TOD_Sky.Instance;
+        }
     };
 
 
@@ -746,6 +842,7 @@ var visionPVP_time_object           = function() {
      * @return {Integer}
      */
     this.hour           = function() {
+        if (!this.sky) this.init();
         var hour = parseInt(this.sky.Cycle.Hour);
         return hour;
     };
@@ -756,6 +853,7 @@ var visionPVP_time_object           = function() {
      * @return {Float}
      */
     this.time           = function() {
+        if (!this.sky) this.init();
         var time = this.sky.Cycle.Hour;
         return time;
     };
@@ -766,6 +864,7 @@ var visionPVP_time_object           = function() {
      * @return {Boolean}
      */
     this.isDay          = function() {
+        if (!this.sky) this.init();
         return this.sky.IsDay;
     };
 
@@ -775,6 +874,7 @@ var visionPVP_time_object           = function() {
      * @return {Boolean}
      */
     this.isNight        = function() {
+        if (!this.sky) this.init();
         return this.sky.IsNight;
     };
 
@@ -1127,7 +1227,7 @@ var visionPVP_event_handler         = function(dataObject, engine) {
     this.init           = function(dataObject, engine) {
         this.engine     = engine;
         this.data       = dataObject;
-        this.pveMode    = !(this.engine.config.Settings['event']['pvp_event_mode'] != 'pvp');
+        this.pveMode    = parseInt((this.engine.config.Settings['event']['pvp_event_mode'] != 'pvp'));
         this.length     = parseInt(this.engine.config.Settings['event']['pvp_duration']);
 
         this.hooks          = {
@@ -1147,18 +1247,28 @@ var visionPVP_event_handler         = function(dataObject, engine) {
 
         if (this.switched) {
             var msg         = this.engine.resources.get('chat', 'event_start');
+            var mode        = (this.pveMode == 1) ? 'PVE' : 'PVP';
+            this.msg        = msg.replace('%mode%', mode).replace("%hours%", this.length);
+        } else {
+            var msg         = this.engine.resources.get('chat', 'event_stop');
             var mode        = (this.pveMode != 1) ? 'PVE' : 'PVP';
             this.msg        = msg.replace('%mode%', mode).replace("%hours%", this.length);
 
-        } else {
-            var msg         = this.engine.resources.get('chat', 'event_stop');
-            var mode        = (this.pveMode == 1) ? 'PVE' : 'PVP';
-            this.msg        = msg.replace('%mode%', mode).replace("%hours%", this.length);
         }
 
-        //if (this.switched) this.engine.console(this.msg);
-
-        return (this.switched) ? !this.pveMode : this.pveMode;
+        if (this.switched) {
+            if (this.pveMode == 1) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else{
+            if (this.pveMode != 1) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
     };
 
     this.invoke         = function(data, engine) {
@@ -1272,8 +1382,8 @@ var visionPVP_resource              = function(engine) {
                 'pvp_stop':         "Player Vs Player freedoms have just been revoked in compliance with the population laws",
                 'event_start':      "Warning: %mode% mode will be inacted for %hours% hours in compliance with the SOTF Aggreement",
                 'event_stop':       "%mode% is now over in compliance with the SOTF Agreement",
-                'pve_expl': 		"Player Vs Player is now restricted. This means that players attempting to damage other players or buildings will be hurt. You are not protected from fire, explosions, drounding, cold, etc..",
-                'pvp_expl': 		"Player Player Vs Player is now allowed. This means that players may raid, kill, damage buildings without consequence."
+                'pve_expl': 		"Players attempting to damage other players or buildings will be hurt. You are not protected from fire, explosions, drounding, cold, etc..",
+                'pvp_expl': 		"Players may raid, kill, damage buildings without consequence."
             },
 
             'label':                {
@@ -1343,7 +1453,7 @@ var visionPVP = {
      */
     Title:          "visionPVP",
     Author:         "VisionMise",
-    Version:        V(0, 3, 3),
+    Version:        V(0, 4, 2),
     ResourceId:     1135,
     HasConfig:      true,
 
@@ -1351,26 +1461,18 @@ var visionPVP = {
     /**
      * API Variables
      */
-    engine:         "",
+    engine:         false,
     ready:          false,
     prefix:         "visionPVP",
     modes:          ['pvp', 'pve', 'pvp-night', 'pvp-day', 'random', 'time', 'event'],
-
-  
-
-    /**
-     * Init Oxide Hook
-     */
-    OnServerInitialized: function () {
-    },
+    serverReady:    false,
+    pluginReady:    false,
 
     
     /**
      * OnServerInitialized Oxide Hook
      */
     OnServerInitialized:    function () {      
-        
-    	 
         
         var consoleCommands = {
             'pvp':          'setPvpMode',
@@ -1380,7 +1482,7 @@ var visionPVP = {
         };
 
         var chatCommands    = {
-            'pvp':          'getPvpMode'
+            //'pvp':          'getPvpMode'
         };
 
         for (var cmd in consoleCommands) {
@@ -1396,16 +1498,35 @@ var visionPVP = {
             command.AddChatCommand(name, this.Plugin, func);
         }
 
-        this.engine     = new visionPVP_engine(this.Plugin, this.Config, rust, data, this.prefix, engineVersion, this);
-        this.ready      = true; 
+        this.serverReady    = true;
     },
 
+    Init:                   function() {
+        print("Starting "+ this.prefix +" Engine");        
+        this.engine         = new visionPVP_engine(this.Plugin, this.Config, rust, data, this.prefix, engineVersion, this);
+    },
+
+    OnPluginLoaded:         function() {
+        this.engine.startTime();
+        this.pluginReady    = true;
+    },
 
     /**
      * OnTick Oxide Hook
      */
     OnTick:                 function() {
-        if (this.ready) this.engine.timerTick();
+
+        if (!this.engine) {
+            this.engine = -1;
+        } else {
+            if (this.ready == false) {
+                this.ready = this.engine.ready;
+            }
+
+            if (this.ready && this.engine.ready) {
+                this.engine.timerTick();
+            }
+        }
     },
 
 
@@ -1430,7 +1551,7 @@ var visionPVP = {
                 pvp = true;
             }
 
-            rust.SendChatMessage(player, this.prefix, msg);
+            //rust.SendChatMessage(player, this.prefix, msg);
             return pvp;
         },
 
@@ -1522,8 +1643,14 @@ var visionPVP = {
     /** Oxide Hooks */
 
 
-    	onEntityTakeDamage: function(entity, hitInfo) {
-
+    	OnEntityTakeDamage:        function(entity, hitInfo) {
+            if (hitInfo['HitEntity']) {
+                if (hitInfo.HitEntity.GetComponent("BasePlayer")) {
+                    if (this.engine.serverPveMode() == 1) {
+                        return true;
+                    }
+                }
+            }
     	},
 
 
